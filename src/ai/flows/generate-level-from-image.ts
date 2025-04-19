@@ -20,6 +20,7 @@ export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 const LevelTemplateSchema = z.object({
   name: z.string().describe('Name or short description of the level template.'),
   layout: z.string().describe('The generated game level layout in JSON format for this template.'),
+  imageURL: z.string().optional().describe('URL for the Level Template Image'),
 });
 
 const GenerateLevelOutputSchema = z.object({

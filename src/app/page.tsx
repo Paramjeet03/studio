@@ -9,11 +9,13 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import { z } from 'zod';
+import {z} from 'zod';
+import {useEffect} from 'react';
 
 const levelTemplateSchema = z.object({
   name: z.string(),
   layout: z.string(),
+  imageURL: z.string().optional(), // URL for the level template image
 });
 
 type LevelTemplate = z.infer<typeof levelTemplateSchema>;
@@ -57,8 +59,14 @@ export default function Home() {
         theme: selectedTheme,
       });
 
-      setLevelTemplates(result.levelTemplates);
-      setSelectedTemplate(result.levelTemplates[0] || null);
+      // Ensure each level template has a unique image URL.  For now, just picsum
+      const updatedLevelTemplates = result.levelTemplates.map((template, index) => ({
+        ...template,
+        imageURL: `https://picsum.photos/200/150?random=${index}`,
+      }));
+
+      setLevelTemplates(updatedLevelTemplates);
+      setSelectedTemplate(updatedLevelTemplates[0] || null);
       setThemes(result.themeSuggestions);
 
       toast({
@@ -87,11 +95,14 @@ export default function Home() {
       return;
     }
 
+    // Extract file extension from game folder path.
+    const fileExtension = gameFolder.split('.').pop() || 'json';
+
     const blob = new Blob([selectedTemplate.layout], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'level.json';
+    a.download = `level.${fileExtension}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -99,7 +110,7 @@ export default function Home() {
 
     toast({
       title: 'Level Exported!',
-      description: 'Level layout has been exported as level.json',
+      description: `Level layout has been exported as level.${fileExtension}`,
     });
   };
 
@@ -130,8 +141,13 @@ export default function Home() {
               value={gameFolder}
               onChange={(e) => setGameFolder(e.target.value)}
             />
-                        <p className="text-sm text-muted-foreground">
-              Providing your game folder allows the AI to suggest appropriate scenes and create levels based on existing game variables, functions, language, and engine.
+            <p className="text-sm text-muted-foreground">
+              Providing your game folder path allows the AI to:
+              <ul>
+                <li>1. Suggest appropriate scenes based on existing game assets.</li>
+                <li>2. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
+                <li>3.  Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
+              </ul>
             </p>
             {themes.length > 0 && (
               <>
@@ -159,30 +175,34 @@ export default function Home() {
         <Card className="w-1/2">
           <CardHeader>
             <CardTitle>Level Template Preview</CardTitle>
-            <CardDescription>Select a generated level template (JSON format).</CardDescription>
+            <CardDescription>Select a generated level template.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
             {levelTemplates.length > 0 ? (
               <>
                 <Label>Select a Template:</Label>
-                <Select
-                  value={selectedTemplate?.name || ''}
-                  onValueChange={(value) => {
-                    const template = levelTemplates.find((t) => t.name === value);
-                    setSelectedTemplate(template || null);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a level template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {levelTemplates.map((template) => (
-                      <SelectItem key={template.name} value={template.name}>
+                <div className="grid grid-cols-2 gap-4">
+                  {levelTemplates.map((template) => (
+                    <button
+                      key={template.name}
+                      className={`aspect-video relative rounded-md overflow-hidden border-2  ${
+                        selectedTemplate?.name === template.name ? 'border-primary' : 'border-transparent'
+                      }`}
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      {template.imageURL && (
+                        <img
+                          src={template.imageURL}
+                          alt={template.name}
+                          className="object-cover w-full h-full"
+                        />
+                      )}
+                      <div className="absolute bottom-0 left-0 w-full bg-black/50 text-white p-2 text-sm">
                         {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </div>
+                    </button>
+                  ))}
+                </div>
                 {selectedTemplate && (
                   <Textarea
                     readOnly
