@@ -141,14 +141,14 @@ export default function Home() {
               value={gameFolder}
               onChange={(e) => setGameFolder(e.target.value)}
             />
-            <p className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               Providing your game folder path allows the AI to:
               <ul>
                 <li>1. Suggest appropriate scenes based on existing game assets.</li>
                 <li>2. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
                 <li>3.  Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
               </ul>
-            </p>
+            </div>
             {themes.length > 0 && (
               <>
                 <Label>Select Theme:</Label>
