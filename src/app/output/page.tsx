@@ -72,17 +72,104 @@ export default function OutputPage() {
          setLoading(true);
          try {
              const files = [
-@@ -54,6 +65,7 @@
+                 { name: 'level.json', content: levelLayout },
+                 { name: 'theme.txt', content: selectedTheme || 'default' },
+                 { name: 'background.txt', content: selectedBackground || 'default_background' },
+                 { name: 'sprite.txt', content: selectedSprite || 'default_sprite' },
+             ];
+
+             // Create a zip file containing the level files
+             const zipFileName = 'level_pack.zip';
+             const zip = new JSZip();
+             files.forEach(file => {
+                 zip.file(file.name, file.content);
+             });
+
+             const content = await zip.generateAsync({ type: 'blob' });
+             const url = URL.createObjectURL(content);
+
+             const link = document.createElement('a');
+             link.href = url;
+             link.download = zipFileName;
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+
+             setGeneratedLevelURL(url);
+             toast({
                  title: 'Level Download Started',
                  description: 'Your level is now being downloaded as a zip file.',
              });
-+              router.push('/');
+              router.push('/');
          } catch (error: any) {
              console.error('Error creating and downloading zip file:', error);
              toast({
-@@ -175,4 +187,4 @@
-         </div>
-  );
- }
--
-+
+                 variant: 'destructive',
+                 title: 'Download Failed',
+                 description: error.message || 'Failed to create the level zip file.',
+             });
+         } finally {
+             setLoading(false);
+         }
+     };
+
+    return (
+        <div className="flex flex-col items-center justify-start min-h-screen p-4">
+            <Card className="w-full max-w-4xl">
+                <CardHeader>
+                    <CardTitle>Generated Level</CardTitle>
+                    <CardDescription>Customize your level and download the files.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col space-y-4">
+                    {levelLayout ? (
+                        <>
+                            {/* Theme Selection */}
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="theme"
+                                        render={({ field }) => (
+                                            <FormItem className="space-y-3">
+                                                <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
+                                                    {themeSuggestions.map((theme) => (
+                                                        <FormItem key={theme} className="flex items-center space-x-3 space-y-0">
+                                                            <FormControl>
+                                                                <RadioGroupItem value={theme} id={theme} className='bg-teal-500' />
+                                                            </FormControl>
+                                                            <FormLabel htmlFor={theme}>{theme}</FormLabel>
+                                                        </FormItem>
+                                                    ))}
+                                                </RadioGroup>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </form>
+                            </Form>
+                                <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
+                                    {loading ? 'Downloading...' : 'Download Level'}
+                                </Button>
+
+                            {generatedLevelURL && (
+                                <Alert>
+                                    <AlertTitle>Level Ready!</AlertTitle>
+                                    <AlertDescription>
+                                        Your level is ready. <a href={generatedLevelURL} download="level.zip" className="underline">Download it here</a>.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
+                        </>
+                    ) : (
+                        <Alert variant="destructive">
+                            <AlertTitle>No Level Generated</AlertTitle>
+                            <AlertDescription>
+                                Please generate a level layout first.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+ );
+}
