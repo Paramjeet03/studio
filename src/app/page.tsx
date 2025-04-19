@@ -9,22 +9,12 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import {z} from 'zod';
 import {useEffect} from 'react';
-
-const levelTemplateSchema = z.object({
-  name: z.string(),
-  layout: z.string(),
-  imageURL: z.string().optional(), // URL for the level template image
-});
-
-type LevelTemplate = z.infer<typeof levelTemplateSchema>;
 
 export default function Home() {
   const [imageURL, setImageURL] = useState('');
   const [gameFolder, setGameFolder] = useState('');
-  const [levelTemplates, setLevelTemplates] = useState<LevelTemplate[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<LevelTemplate | null>(null);
+  const [levelLayout, setLevelLayout] = useState('');
   const [themes, setThemes] = useState<string[]>([]);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [loading, setLoading] = useState(false);
@@ -59,19 +49,12 @@ export default function Home() {
         theme: selectedTheme,
       });
 
-      // Ensure each level template has a unique image URL.  For now, just picsum
-      const updatedLevelTemplates = result.levelTemplates.map((template, index) => ({
-        ...template,
-        imageURL: `https://picsum.photos/200/150?random=${index}`,
-      }));
-
-      setLevelTemplates(updatedLevelTemplates);
-      setSelectedTemplate(updatedLevelTemplates[0] || null);
+      setLevelLayout(result.levelLayout);
       setThemes(result.themeSuggestions);
 
       toast({
-        title: 'Level Templates Generated!',
-        description: 'Level templates have been generated successfully.',
+        title: 'Level Layout Generated!',
+        description: 'A level layout has been generated successfully.',
       });
     } catch (error: any) {
       console.error('Error generating level:', error);
@@ -86,23 +69,20 @@ export default function Home() {
   };
 
   const handleExportLevel = () => {
-    if (!selectedTemplate) {
+    if (!levelLayout) {
       toast({
         title: 'Error',
-        description: 'No level template selected. Generate a level first and select a template.',
+        description: 'No level layout generated. Generate a level first.',
         variant: 'destructive',
       });
       return;
     }
 
-    // Extract file extension from game folder path.
-    const fileExtension = gameFolder.split('.').pop() || 'json';
-
-    const blob = new Blob([selectedTemplate.layout], {type: 'application/json'});
+    const blob = new Blob([levelLayout], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `level.${fileExtension}`;
+    a.download = 'level.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -110,7 +90,7 @@ export default function Home() {
 
     toast({
       title: 'Level Exported!',
-      description: `Level layout has been exported as level.${fileExtension}`,
+      description: 'Level layout has been exported as level.json',
     });
   };
 
@@ -121,7 +101,7 @@ export default function Home() {
         <Card className="w-1/2">
           <CardHeader>
             <CardTitle>Image Upload</CardTitle>
-            <CardDescription>Upload an image to generate game level templates.</CardDescription>
+            <CardDescription>Upload an image to generate a game level layout.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
             <Label htmlFor="image-upload">Upload Image:</Label>
@@ -144,10 +124,11 @@ export default function Home() {
             <div className="text-sm text-muted-foreground">
               Providing your game folder path allows the AI to:
               <ul>
-                <li>1. Suggest appropriate scenes based on existing game assets.</li>
-                <li>2. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
-                <li>3.  Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
+                <li>1. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
+                <li>2.  Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
               </ul>
+              Additionally, if you want the AI to consider specific changes to the level structure or content
+              based on your existing game's parameters, detail these requirements in a separate document within your game folder.
             </div>
             {themes.length > 0 && (
               <>
@@ -167,60 +148,24 @@ export default function Home() {
               </>
             )}
             <Button onClick={handleGenerateLevel} disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Level Templates'}
+              {loading ? 'Generating...' : 'Generate Level Layout'}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="w-1/2">
           <CardHeader>
-            <CardTitle>Level Template Preview</CardTitle>
-            <CardDescription>Select a generated level template.</CardDescription>
+            <CardTitle>Level Layout</CardTitle>
+            <CardDescription>View and export the generated level layout.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
-            {levelTemplates.length > 0 ? (
-              <>
-                <Label>Select a Template:</Label>
-                <div className="grid grid-cols-2 gap-4">
-                  {levelTemplates.map((template) => (
-                    <button
-                      key={template.name}
-                      className={`aspect-video relative rounded-md overflow-hidden border-2  ${
-                        selectedTemplate?.name === template.name ? 'border-primary' : 'border-transparent'
-                      }`}
-                      onClick={() => setSelectedTemplate(template)}
-                    >
-                      {template.imageURL && (
-                        <img
-                          src={template.imageURL}
-                          alt={template.name}
-                          className="object-cover w-full h-full"
-                        />
-                      )}
-                      <div className="absolute bottom-0 left-0 w-full bg-black/50 text-white p-2 text-sm">
-                        {template.name}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {selectedTemplate && (
-                  <Textarea
-                    readOnly
-                    value={selectedTemplate.layout}
-                    placeholder="Generated level layout will appear here."
-                    className="min-h-[200px] font-mono text-sm"
-                  />
-                )}
-              </>
-            ) : (
-              <Textarea
-                readOnly
-                value=""
-                placeholder="Generated level templates will appear here. Upload an image and generate templates first."
-                className="min-h-[300px] font-mono text-sm"
-              />
-            )}
-            <Button onClick={handleExportLevel} disabled={!selectedTemplate}>
+            <Textarea
+              readOnly
+              value={levelLayout}
+              placeholder="Generated level layout will appear here."
+              className="min-h-[300px] font-mono text-sm"
+            />
+            <Button onClick={handleExportLevel} disabled={!levelLayout}>
               Export Level
             </Button>
           </CardContent>
