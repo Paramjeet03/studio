@@ -52,7 +52,7 @@ export default function OutputPage() {
       setSelectedBackground(form.watch('background') || null);
     }, [form.watch('theme'), form.watch('background')]);
 
-     function onSubmit(values: z.infer<typeof formSchema>> {
+     function onSubmit(values: z.infer<typeof formSchema>) {
          toast({
              title: 'You submitted the following values:',
              description: JSON.stringify(values, null, 2),
@@ -158,3 +158,4 @@ export default function OutputPage() {
          </div>
   );
 }
+
