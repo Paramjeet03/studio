@@ -8,53 +8,61 @@ body {
 
 @layer base {
   :root {
-    /* Default theme (Light gray and Teal) */
-    --background: 200 0% 86%; /* Light gray */
-    --foreground: 210 10% 20%; /* Dark gray */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 180 100% 25%; /* Teal */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 200 0% 86%; /* Light gray */
-    --secondary-foreground: 210 10% 20%; /* Dark gray */
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 180 100% 25%; /* Teal */
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* AI Gaming Theme */
+    --ai-primary-color: #0FF0FC; /* Neon Cyan */
+    --ai-secondary-color: #00FFC6; /* Electric Mint */
+    --ai-accent-color: #FF2E63; /* Vibrant Neon Pink */
+    --ai-background-color: #0A0F1C; /* Deep Space Black */
+    --rgb-effect: 0; /* 0: disabled, 1: enabled */
 
-    /* Alternative themes */
-    /* Forest Theme (Green and Brown) */
+    /* Default theme mapped to AI Gaming Theme */
+    --background: #0A0F1C;
+    --foreground: #E0E0E0;
+    --card: #141925;
+    --card-foreground: #E0E0E0;
+    --popover: #1C2233;
+    --popover-foreground: #E0E0E0;
+    --primary: #0FF0FC;
+    --primary-foreground: #000000;
+    --secondary: #1A1F2B;
+    --secondary-foreground: #C0C0C0;
+    --muted: #232836;
+    --muted-foreground: #999999;
+    --accent: #FF2E63;
+    --accent-foreground: #FFFFFF;
+    --destructive: #FF0033;
+    --destructive-foreground: #FFFFFF;
+    --border: #2D3142;
+    --input: #2D3142;
+    --ring: #00FFC6;
+
+    --chart-1: 177 100% 65%;
+    --chart-2: 321 100% 65%;
+    --chart-3: 255 100% 65%;
+    --chart-4: 60 100% 65%;
+    --chart-5: 120 100% 65%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: #0D101A;
+    --sidebar-foreground: #CCCCCC;
+    --sidebar-primary: var(--ai-primary-color);
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: var(--ai-accent-color);
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #333A50;
+    --sidebar-ring: #00FFC6;
+
+    /* (Optional) Keep alternative themes if needed */
     --forest-background: 120 30% 95%;
     --forest-foreground: 30 20% 30%;
-    --forest-primary: 100 70% 40%;
+    --forest-primary: 50 70% 40%;
     --forest-primary-foreground: 0 0% 100%;
     --forest-secondary: 70 20% 80%;
     --forest-secondary-foreground: 30 20% 30%;
     --forest-accent: 110 60% 50%;
     --forest-accent-foreground: 0 0% 100%;
 
-    /* Ocean Theme (Blue and Sand) */
     --ocean-background: 220 30% 95%;
     --ocean-foreground: 210 10% 30%;
     --ocean-primary: 200 70% 50%;
@@ -64,7 +72,6 @@ body {
     --ocean-accent: 190 60% 60%;
     --ocean-accent-foreground: 0 0% 100%;
 
-    /* Desert Theme (Yellow and Beige) */
     --desert-background: 45 20% 95%;
     --desert-foreground: 30 10% 30%;
     --desert-primary: 50 70% 60%;
@@ -74,7 +81,6 @@ body {
     --desert-accent: 60 60% 70%;
     --desert-accent-foreground: 0 0% 0%;
 
-    /* Cyberpunk Theme (Purple and Teal) */
     --cyberpunk-background: 270 10% 20%;
     --cyberpunk-foreground: 180 20% 80%;
     --cyberpunk-primary: 300 70% 50%;
@@ -84,100 +90,55 @@ body {
     --cyberpunk-accent: 180 60% 50%;
     --cyberpunk-accent-foreground: 0 0% 0%;
 
-    /* Pastel Theme */
-    --pastel-background: 300 20% 98%; /* Soft pink */
-    --pastel-foreground: 230 20% 40%; /* Soft blue */
-    --pastel-primary: 160 50% 70%; /* Soft green */
+    --pastel-background: 300 20% 98%;
+    --pastel-foreground: 230 20% 40%;
+    --pastel-primary: 160 50% 70%;
     --pastel-primary-foreground: 20 10% 10%;
-    --pastel-secondary: 60 30% 90%; /* Soft yellow */
+    --pastel-secondary: 60 30% 90%;
     --pastel-secondary-foreground: 230 20% 40%;
-    --pastel-accent: 30 40% 80%; /* Soft orange */
+    --pastel-accent: 30 40% 80%;
     --pastel-accent-foreground: 20 10% 10%;
   }
+
   .dark {
-    --background: 210 10% 20%; /* Dark gray */
-    --foreground: 200 0% 86%; /* Light gray */
-    --card: 210 11% 15%;
-    --card-foreground: 0 0% 98%;
-    --popover: 210 11% 15%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 180 100% 25%; /* Teal */
-    --primary-foreground: 0 0% 9%;
-    --secondary: 210 10% 20%; /* Dark gray */
-    --secondary-foreground: 200 0% 86%; /* Light gray */
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 180 100% 25%; /* Teal */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: #000000;
+    --foreground: hsla(0, 43%, 40%, 0.881);
+    --card: #0E1422;
+    --card-foreground: #E0E0E0;
+    --popover: #111827;
+    --popover-foreground: #E0E0E0;
+    --primary: #0FF0FC;
+    --primary-foreground: #000000;
+    --secondary: #1F2937;
+    --secondary-foreground: #E0E0E0;
+    --muted: #232836;
+    --muted-foreground: #999999;
+    --accent: #FF2E63;
+    --accent-foreground: #FFFFFF;
+    --destructive: #FF0033;
+    --destructive-foreground: #FFFFFF;
+    --border: #2D3142;
+    --input: #2D3142;
+    --ring: #00FFC6;
 
-    /* Dark mode alternative themes */
-    /* Forest Theme (Dark) */
-    --dark-forest-background: 120 20% 15%;
-    --dark-forest-foreground: 70 20% 80%;
-    --dark-forest-primary: 100 50% 60%;
-    --dark-forest-primary-foreground: 0 0% 0%;
-    --dark-forest-secondary: 70 10% 30%;
-    --dark-forest-secondary-foreground: 70 20% 80%;
-    --dark-forest-accent: 110 40% 70%;
-    --dark-forest-accent-foreground: 0 0% 0%;
+    --chart-1: 177 100% 60%;
+    --chart-2: 321 100% 60%;
+    --chart-3: 255 100% 60%;
+    --chart-4: 60 100% 60%;
+    --chart-5: 120 100% 60%;
 
-    /* Ocean Theme (Dark) */
-    --dark-ocean-background: 220 20% 15%;
-    --dark-ocean-foreground: 200 10% 80%;
-    --dark-ocean-primary: 200 50% 50%;
-    --dark-ocean-primary-foreground: 0 0% 0%;
-    --dark-ocean-secondary: 210 10% 30%;
-    --dark-ocean-secondary-foreground: 200 10% 80%;
-    --dark-ocean-accent: 190 40% 60%;
-    --dark-ocean-accent-foreground: 0 0% 0%;
+    --sidebar-background: #0A0F1C;
+    --sidebar-foreground: #E0E0E0;
+    --sidebar-primary: #00FFC6;
+    --sidebar-primary-foreground: #000000;
+    --sidebar-accent: #FF2E63;
+    --sidebar-accent-foreground: #FFFFFF;
+    --sidebar-border: #2A2F45;
+    --sidebar-ring: #00FFC6;
+  }
 
-    /* Desert Theme (Dark) */
-    --dark-desert-background: 45 10% 20%;
-    --dark-desert-foreground: 40 10% 80%;
-    --dark-desert-primary: 50 50% 50%;
-    --dark-desert-primary-foreground: 0 0% 0%;
-    --dark-desert-secondary: 40 10% 30%;
-    --dark-desert-secondary-foreground: 40 10% 80%;
-    --dark-desert-accent: 60 40% 60%;
-    --dark-desert-accent-foreground: 0 0% 0%;
-
-    /* Cyberpunk Theme (Dark) */
-    --dark-cyberpunk-background: 270 10% 10%;
-    --dark-cyberpunk-foreground: 180 20% 90%;
-    --dark-cyberpunk-primary: 300 50% 60%;
-    --dark-cyberpunk-primary-foreground: 0 0% 0%;
-    --dark-cyberpunk-secondary: 280 10% 20%;
-    --dark-cyberpunk-secondary-foreground: 180 20% 90%;
-    --dark-cyberpunk-accent: 180 40% 70%;
-    --dark-cyberpunk-accent-foreground: 0 0% 0%;
-
-    /* Pastel Theme (Dark) */
-    --dark-pastel-background: 300 10% 20%;
-    --dark-pastel-foreground: 230 10% 80%;
-    --dark-pastel-primary: 160 30% 50%;
-    --dark-pastel-primary-foreground: 0 0% 0%;
-    --dark-pastel-secondary: 60 20% 30%;
-    --dark-pastel-secondary-foreground: 230 10% 80%;
-    --dark-pastel-accent: 30 30% 60%;
-    --dark-pastel-accent-foreground: 0 0% 0%;
+  .rgb-effect-enabled {
+    --rgb-effect: 1;
   }
 }
 
@@ -187,5 +148,38 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .primary {
+    position: relative;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 400% 400%;
+      animation: gradientShift 10s ease infinite;
+      z-index: -1;
+      border-radius: inherit;
+      opacity: var(--rgb-effect);
+    }
+  }
+}
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
