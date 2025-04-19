@@ -8,6 +8,7 @@ body {
 
 @layer base {
   :root {
+    /* Default theme (Light gray and Teal) */
     --background: 200 0% 86%; /* Light gray */
     --foreground: 210 10% 20%; /* Dark gray */
     --card: 0 0% 100%;
@@ -41,6 +42,57 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Alternative themes */
+    /* Forest Theme (Green and Brown) */
+    --forest-background: 120 30% 95%;
+    --forest-foreground: 30 20% 30%;
+    --forest-primary: 100 70% 40%;
+    --forest-primary-foreground: 0 0% 100%;
+    --forest-secondary: 70 20% 80%;
+    --forest-secondary-foreground: 30 20% 30%;
+    --forest-accent: 110 60% 50%;
+    --forest-accent-foreground: 0 0% 100%;
+
+    /* Ocean Theme (Blue and Sand) */
+    --ocean-background: 220 30% 95%;
+    --ocean-foreground: 210 10% 30%;
+    --ocean-primary: 200 70% 50%;
+    --ocean-primary-foreground: 0 0% 100%;
+    --ocean-secondary: 30 30% 90%;
+    --ocean-secondary-foreground: 210 10% 30%;
+    --ocean-accent: 190 60% 60%;
+    --ocean-accent-foreground: 0 0% 100%;
+
+    /* Desert Theme (Yellow and Beige) */
+    --desert-background: 45 20% 95%;
+    --desert-foreground: 30 10% 30%;
+    --desert-primary: 50 70% 60%;
+    --desert-primary-foreground: 0 0% 0%;
+    --desert-secondary: 40 20% 90%;
+    --desert-secondary-foreground: 30 10% 30%;
+    --desert-accent: 60 60% 70%;
+    --desert-accent-foreground: 0 0% 0%;
+
+    /* Cyberpunk Theme (Purple and Teal) */
+    --cyberpunk-background: 270 10% 20%;
+    --cyberpunk-foreground: 180 20% 80%;
+    --cyberpunk-primary: 300 70% 50%;
+    --cyberpunk-primary-foreground: 0 0% 100%;
+    --cyberpunk-secondary: 280 20% 30%;
+    --cyberpunk-secondary-foreground: 180 20% 80%;
+    --cyberpunk-accent: 180 60% 50%;
+    --cyberpunk-accent-foreground: 0 0% 0%;
+
+    /* Pastel Theme */
+    --pastel-background: 300 20% 98%; /* Soft pink */
+    --pastel-foreground: 230 20% 40%; /* Soft blue */
+    --pastel-primary: 160 50% 70%; /* Soft green */
+    --pastel-primary-foreground: 20 10% 10%;
+    --pastel-secondary: 60 30% 90%; /* Soft yellow */
+    --pastel-secondary-foreground: 230 20% 40%;
+    --pastel-accent: 30 40% 80%; /* Soft orange */
+    --pastel-accent-foreground: 20 10% 10%;
   }
   .dark {
     --background: 210 10% 20%; /* Dark gray */
@@ -75,6 +127,57 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Dark mode alternative themes */
+    /* Forest Theme (Dark) */
+    --dark-forest-background: 120 20% 15%;
+    --dark-forest-foreground: 70 20% 80%;
+    --dark-forest-primary: 100 50% 60%;
+    --dark-forest-primary-foreground: 0 0% 0%;
+    --dark-forest-secondary: 70 10% 30%;
+    --dark-forest-secondary-foreground: 70 20% 80%;
+    --dark-forest-accent: 110 40% 70%;
+    --dark-forest-accent-foreground: 0 0% 0%;
+
+    /* Ocean Theme (Dark) */
+    --dark-ocean-background: 220 20% 15%;
+    --dark-ocean-foreground: 200 10% 80%;
+    --dark-ocean-primary: 200 50% 50%;
+    --dark-ocean-primary-foreground: 0 0% 0%;
+    --dark-ocean-secondary: 210 10% 30%;
+    --dark-ocean-secondary-foreground: 200 10% 80%;
+    --dark-ocean-accent: 190 40% 60%;
+    --dark-ocean-accent-foreground: 0 0% 0%;
+
+    /* Desert Theme (Dark) */
+    --dark-desert-background: 45 10% 20%;
+    --dark-desert-foreground: 40 10% 80%;
+    --dark-desert-primary: 50 50% 50%;
+    --dark-desert-primary-foreground: 0 0% 0%;
+    --dark-desert-secondary: 40 10% 30%;
+    --dark-desert-secondary-foreground: 40 10% 80%;
+    --dark-desert-accent: 60 40% 60%;
+    --dark-desert-accent-foreground: 0 0% 0%;
+
+    /* Cyberpunk Theme (Dark) */
+    --dark-cyberpunk-background: 270 10% 10%;
+    --dark-cyberpunk-foreground: 180 20% 90%;
+    --dark-cyberpunk-primary: 300 50% 60%;
+    --dark-cyberpunk-primary-foreground: 0 0% 0%;
+    --dark-cyberpunk-secondary: 280 10% 20%;
+    --dark-cyberpunk-secondary-foreground: 180 20% 90%;
+    --dark-cyberpunk-accent: 180 40% 70%;
+    --dark-cyberpunk-accent-foreground: 0 0% 0%;
+
+    /* Pastel Theme (Dark) */
+    --dark-pastel-background: 300 10% 20%;
+    --dark-pastel-foreground: 230 10% 80%;
+    --dark-pastel-primary: 160 30% 50%;
+    --dark-pastel-primary-foreground: 0 0% 0%;
+    --dark-pastel-secondary: 60 20% 30%;
+    --dark-pastel-secondary-foreground: 230 10% 80%;
+    --dark-pastel-accent: 30 30% 60%;
+    --dark-pastel-accent-foreground: 0 0% 0%;
   }
 }
 
