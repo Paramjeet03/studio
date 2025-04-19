@@ -21,6 +21,8 @@ export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 const GenerateLevelOutputSchema = z.object({
   levelLayout: z.string().describe('The generated game level layout in JSON format.'),
   themeSuggestions: z.array(z.string()).describe('Suggested themes derived from the image.'),
+  backgroundImageURL: z.string().optional().describe('Suggested background image URL'),
+  spriteImageURL: z.string().optional().describe('Suggested sprite image URL'),
 });
 export type GenerateLevelOutput = z.infer<typeof GenerateLevelOutputSchema>;
 
@@ -146,8 +148,14 @@ const generateLevelFromImageFlow = ai.defineFlow<
     levelDescription: levelDescription,
   });
 
+  // Generate placeholder image URLs (replace with your logic)
+  const backgroundImageURL = `https://picsum.photos/800/600?random=${Math.random()}`; // Example: Random background
+  const spriteImageURL = `https://picsum.photos/100/100?random=${Math.random() + 1}`; // Example: Random sprite
+
   return {
     levelLayout: generateLevelTemplatesOutput!.levelLayout,
     themeSuggestions: analyzeImageOutput!.themeSuggestions,
+    backgroundImageURL: backgroundImageURL,
+    spriteImageURL: spriteImageURL,
   };
 });
