@@ -17,9 +17,11 @@ import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, Form
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Textarea} from "@/components/ui/textarea";
 
 const formSchema = z.object({
   theme: z.string().optional(),
+  levelDescription: z.string().optional(),
 })
 
 export default function Home() {
@@ -37,6 +39,7 @@ export default function Home() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       theme: '',
+      levelDescription: '',
     },
   })
 
@@ -73,6 +76,7 @@ export default function Home() {
       const result = await generateLevelFromImage({
         imageURL,
         gameFolder,
+        levelDescription: form.getValues().levelDescription, // Send Level description to AI flow
       });
 
       const levelLayout = result.levelLayout;
@@ -116,6 +120,12 @@ export default function Home() {
                 <span className="text-gray-500">Upload an image or sketch here</span>
               </div>
             )}
+             <Label htmlFor="level-description">Describe more about Level (optional):</Label>
+            <Textarea
+              id="level-description"
+              placeholder="Describe any specific requirements or ideas for the level"
+              {...form.register('levelDescription')}
+            />
             <Label htmlFor="game-folder">Game Folder (optional):</Label>
             <Input
               id="game-folder"
@@ -128,7 +138,7 @@ export default function Home() {
               Providing your game folder path allows the AI to:
             </p>
             <ul>
-              <li>1. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
+              <li>Tailor the level creation based on existing game variables, functions, language, and engine.</li>
             </ul>
             <div className="text-sm text-muted-foreground">
               If you want the AI to consider specific changes to the level structure or content
@@ -158,5 +168,3 @@ export default function Home() {
     </div>
   );
 }
-
-

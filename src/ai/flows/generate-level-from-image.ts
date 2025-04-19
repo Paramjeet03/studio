@@ -14,6 +14,7 @@ const GenerateLevelInputSchema = z.object({
   imageURL: z.string().describe('The URL of the uploaded image.'),
   gameFolder: z.string().optional().describe('Path to the game project folder, if available.'),
   theme: z.string().optional().describe('Optional theme to apply to the level generation.'),
+  levelDescription: z.string().optional().describe('Optional user description of the level requirements'),
 });
 export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 
@@ -81,6 +82,7 @@ const generateLevelTemplatesPrompt = ai.definePrompt({
       elements: z.array(z.string()).describe('Key visual elements detected in the image'),
       composition: z.string().describe('Overall composition and layout of the image'),
       levelType: z.string().describe('Type of level suitable for this image'),
+      levelDescription: z.string().optional().describe('User description of level requirements'),
     }),
   },
   output: {
@@ -97,6 +99,7 @@ Theme: {{theme}}
 Visual Elements: {{elements}}
 Composition: {{composition}}
 Level Type: {{levelType}}
+User Description: {{levelDescription}}
 
 Respond with the generated level layout in JSON format.`,
 });
@@ -127,7 +130,7 @@ const generateLevelFromImageFlow = ai.defineFlow<
   inputSchema: GenerateLevelInputSchema,
   outputSchema: GenerateLevelOutputSchema,
 }, async input => {
-  const { imageURL, theme, gameFolder } = input;
+  const { imageURL, theme, gameFolder, levelDescription } = input;
 
   const [{ output: analyzeImageOutput }, { output: detailedAnalysis }] = await Promise.all([
     analyzeImagePrompt({ imageURL }),
@@ -140,6 +143,7 @@ const generateLevelFromImageFlow = ai.defineFlow<
     elements: detailedAnalysis!.elements,
     composition: detailedAnalysis!.composition,
     levelType: detailedAnalysis!.levelType,
+    levelDescription: levelDescription,
   });
 
   return {
