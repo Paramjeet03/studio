@@ -1,8 +1,8 @@
 'use server';
 /**
- * @fileOverview Generates a game level layout based on an uploaded image.
+ * @fileOverview Generates a selection of game level layout templates based on an uploaded image.
  *
- * - generateLevelFromImage - A function that generates a game level layout from an image.
+ * - generateLevelFromImage - A function that generates multiple game level layout templates from an image.
  * - GenerateLevelInput - The input type for the generateLevelFromImage function.
  * - GenerateLevelOutput - The return type for the generateLevelFromImage function.
  */
@@ -17,8 +17,13 @@ const GenerateLevelInputSchema = z.object({
 });
 export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 
+const LevelTemplateSchema = z.object({
+  name: z.string().describe('Name or short description of the level template.'),
+  layout: z.string().describe('The generated game level layout in JSON format for this template.'),
+});
+
 const GenerateLevelOutputSchema = z.object({
-  levelLayout: z.string().describe('The generated game level layout in JSON format.'),
+  levelTemplates: z.array(LevelTemplateSchema).describe('A list of generated game level templates in JSON format.'),
   suggestedScenes: z.array(z.string()).optional().describe('List of suggested scenes based on game folder analysis.'),
   themeSuggestions: z.array(z.string()).describe('Suggested themes derived from the image.'),
 });
@@ -73,8 +78,8 @@ Respond with a JSON object containing:
 });
 
 
-const generateLevelPrompt = ai.definePrompt({
-  name: 'generateLevelPrompt',
+const generateLevelTemplatesPrompt = ai.definePrompt({
+  name: 'generateLevelTemplatesPrompt',
   input: {
     schema: z.object({
       imageURL: z.string().describe('The URL of the uploaded image.'),
@@ -87,10 +92,10 @@ const generateLevelPrompt = ai.definePrompt({
   },
   output: {
     schema: z.object({
-      levelLayout: z.string().describe('The generated game level layout in JSON format.'),
+      levelTemplates: z.array(LevelTemplateSchema).describe('A list of generated game level templates in JSON format.'),
     }),
   },
-  prompt: `You are an expert game level designer. Generate a detailed and imaginative game level layout in JSON format based on the analysis of the following image. Incorporate the visual elements, composition, and level type to create a compelling and engaging level design.
+  prompt: `You are an expert game level designer. Generate three distinct and imaginative game level layouts in JSON format based on the analysis of the following image. Incorporate the visual elements, composition, and level type to create compelling and engaging level designs. Each layout should represent a unique interpretation of the image. Provide a name or short description for each layout.
   Pay close attention to the level type, and incorporate specific game design elements appropriate for the level type. For example, for a platformer make sure to include adequate platforms, for an adventure game make sure to include rooms, pathways, treasure locations, etc.
   Also use the composition of the image to give you some ideas. For example, if the composition is chaotic, then make the layout feel chaotic and dangerous.
 
@@ -101,7 +106,7 @@ Visual Elements: {{elements}}
 Composition: {{composition}}
 Level Type: {{levelType}}
 
-Respond with a JSON object representing the level layout.`,
+Respond with a JSON array of three level template objects. Each object should have a "name" field (string) and a "layout" field (string) representing the JSON layout.`,
 });
 
 const suggestScenesTool = ai.defineTool({
@@ -138,7 +143,7 @@ const generateLevelFromImageFlow = ai.defineFlow<
     detailedImageAnalysisPrompt({ imageURL }),
   ]);
 
-  const { output: generateLevelOutput } = await generateLevelPrompt({
+  const { output: generateLevelTemplatesOutput } = await generateLevelTemplatesPrompt({
     imageURL,
     theme: theme ?? analyzeImageOutput?.themeSuggestions?.[0] ?? 'generic',
     suggestedScenes,
@@ -148,7 +153,7 @@ const generateLevelFromImageFlow = ai.defineFlow<
   });
 
   return {
-    levelLayout: generateLevelOutput!.levelLayout,
+    levelTemplates: generateLevelTemplatesOutput!.levelTemplates,
     suggestedScenes,
     themeSuggestions: analyzeImageOutput!.themeSuggestions,
   };

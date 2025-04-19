@@ -9,11 +9,20 @@ import {Label} from '@/components/ui/label';
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
+import { z } from 'zod';
+
+const levelTemplateSchema = z.object({
+  name: z.string(),
+  layout: z.string(),
+});
+
+type LevelTemplate = z.infer<typeof levelTemplateSchema>;
 
 export default function Home() {
   const [imageURL, setImageURL] = useState('');
   const [gameFolder, setGameFolder] = useState('');
-  const [levelLayout, setLevelLayout] = useState('');
+  const [levelTemplates, setLevelTemplates] = useState<LevelTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<LevelTemplate | null>(null);
   const [themes, setThemes] = useState<string[]>([]);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,12 +57,13 @@ export default function Home() {
         theme: selectedTheme,
       });
 
-      setLevelLayout(JSON.stringify(result.levelLayout, null, 2));
+      setLevelTemplates(result.levelTemplates);
+      setSelectedTemplate(result.levelTemplates[0] || null);
       setThemes(result.themeSuggestions);
 
       toast({
-        title: 'Level Generated!',
-        description: 'Level layout has been generated successfully.',
+        title: 'Level Templates Generated!',
+        description: 'Level templates have been generated successfully.',
       });
     } catch (error: any) {
       console.error('Error generating level:', error);
@@ -68,16 +78,16 @@ export default function Home() {
   };
 
   const handleExportLevel = () => {
-    if (!levelLayout) {
+    if (!selectedTemplate) {
       toast({
         title: 'Error',
-        description: 'No level to export. Generate a level first.',
+        description: 'No level template selected. Generate a level first and select a template.',
         variant: 'destructive',
       });
       return;
     }
 
-    const blob = new Blob([levelLayout], {type: 'application/json'});
+    const blob = new Blob([selectedTemplate.layout], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -100,7 +110,7 @@ export default function Home() {
         <Card className="w-1/2">
           <CardHeader>
             <CardTitle>Image Upload</CardTitle>
-            <CardDescription>Upload an image to generate a game level.</CardDescription>
+            <CardDescription>Upload an image to generate game level templates.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col space-y-4">
             <Label htmlFor="image-upload">Upload Image:</Label>
@@ -120,7 +130,7 @@ export default function Home() {
               value={gameFolder}
               onChange={(e) => setGameFolder(e.target.value)}
             />
-            <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
               Providing your game folder allows the AI to suggest appropriate scenes and create levels based on existing game variables, functions, language, and engine.
             </p>
             {themes.length > 0 && (
@@ -141,24 +151,56 @@ export default function Home() {
               </>
             )}
             <Button onClick={handleGenerateLevel} disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Level'}
+              {loading ? 'Generating...' : 'Generate Level Templates'}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="w-1/2">
           <CardHeader>
-            <CardTitle>Level Preview</CardTitle>
-            <CardDescription>Generated level layout (JSON format).</CardDescription>
+            <CardTitle>Level Template Preview</CardTitle>
+            <CardDescription>Select a generated level template (JSON format).</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Textarea
-              readOnly
-              value={levelLayout}
-              placeholder="Generated level layout will appear here."
-              className="min-h-[300px] font-mono text-sm"
-            />
-            <Button onClick={handleExportLevel} disabled={!levelLayout}>
+          <CardContent className="flex flex-col space-y-4">
+            {levelTemplates.length > 0 ? (
+              <>
+                <Label>Select a Template:</Label>
+                <Select
+                  value={selectedTemplate?.name || ''}
+                  onValueChange={(value) => {
+                    const template = levelTemplates.find((t) => t.name === value);
+                    setSelectedTemplate(template || null);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a level template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {levelTemplates.map((template) => (
+                      <SelectItem key={template.name} value={template.name}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {selectedTemplate && (
+                  <Textarea
+                    readOnly
+                    value={selectedTemplate.layout}
+                    placeholder="Generated level layout will appear here."
+                    className="min-h-[200px] font-mono text-sm"
+                  />
+                )}
+              </>
+            ) : (
+              <Textarea
+                readOnly
+                value=""
+                placeholder="Generated level templates will appear here. Upload an image and generate templates first."
+                className="min-h-[300px] font-mono text-sm"
+              />
+            )}
+            <Button onClick={handleExportLevel} disabled={!selectedTemplate}>
               Export Level
             </Button>
           </CardContent>
