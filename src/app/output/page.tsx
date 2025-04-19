@@ -149,12 +149,16 @@ export default function OutputPage() {
                                          />
                                      </form>
                                  </Form>
++
                                  <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
                                      {loading ? 'Downloading...' : 'Download Level'}
                                  </Button>
-                        </div>
-                   </CardContent>
-              </Card>
-         </div>
-  );
++
+                         </div>
++
+                    </CardContent>
+               </Card>
+          </div>
+   );
 }
+
