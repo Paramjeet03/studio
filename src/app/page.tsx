@@ -10,6 +10,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/c
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {useEffect} from 'react';
+import JSZip from 'jszip'; // Import JSZip
 
 export default function Home() {
   const [imageURL, setImageURL] = useState('');
