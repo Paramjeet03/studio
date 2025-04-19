@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
     theme: z.string().optional(),
@@ -26,6 +27,7 @@ export default function OutputPage() {
     const { toast } = useToast();
     const [generatedLevelURL, setGeneratedLevelURL] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const codeLanguage = searchParams.get('codeLanguage') || 'JSON';
 
     // Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
@@ -45,7 +47,8 @@ export default function OutputPage() {
     useEffect(() => {
         console.log('Level Layout:', levelLayout);
         console.log('Theme Suggestions:', themeSuggestions);
-    }, [levelLayout, themeSuggestions]);
+        console.log('Code Language:', codeLanguage);
+    }, [levelLayout, themeSuggestions, codeLanguage]);
 
     const handleDownloadLevel = async () => {
         if (!levelLayout) {
@@ -68,9 +71,17 @@ export default function OutputPage() {
 
         setLoading(true);
         try {
+            // Determine file extension based on code language
+            let fileExtension = 'json';
+            if (codeLanguage === 'Lua') {
+                fileExtension = 'lua';
+            } else if (codeLanguage === 'GDScript') {
+                fileExtension = 'gd';
+            }
+
             // Create a folder with the level file
             const zip = new JSZip();
-            zip.file('level.json', levelLayout); // level.json is your generated level data
+            zip.file(`level.${fileExtension}`, levelLayout); // level.json is your generated level data
 
             // Generate the zip file as a blob
             zip.generateAsync({ type: "blob" })
@@ -121,7 +132,7 @@ export default function OutputPage() {
                         {levelLayout ? (
                             <pre className="whitespace-pre-wrap">{levelLayout}</pre>
                         ) : (
-                            <Alert>
+                            <Alert variant="destructive">
                                 <AlertTitle>No Level Generated</AlertTitle>
                                 <AlertDescription>Please generate a level layout first.</AlertDescription>
                             </Alert>
@@ -166,7 +177,7 @@ export default function OutputPage() {
                                 </Button>
                             </>
                         ) : (
-                            <Alert>
+                            <Alert variant="destructive">
                                 <AlertTitle>No Themes Suggested</AlertTitle>
                                 <AlertDescription>No themes were suggested. Please try generating the level again.</AlertDescription>
                             </Alert>

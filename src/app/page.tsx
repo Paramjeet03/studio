@@ -16,6 +16,7 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {RadioGroup, RadioGroupItem} from '@/components/ui/radio-group';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
   theme: z.string().optional(),
@@ -29,6 +30,7 @@ export default function Home() {
   const {toast} = useToast();
   const router = useRouter();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [codeLanguage, setCodeLanguage] = useState('JSON'); // Default to JSON
 
   // Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,7 +79,7 @@ export default function Home() {
       const themeSuggestions = result.themeSuggestions;
 
       // Navigate to the output page with the generated level layout and theme suggestions
-      router.push(`/output?levelLayout=${encodeURIComponent(levelLayout)}&themeSuggestions=${encodeURIComponent(JSON.stringify(themeSuggestions))}`);
+      router.push(`/output?levelLayout=${encodeURIComponent(levelLayout)}&themeSuggestions=${encodeURIComponent(JSON.stringify(themeSuggestions))}&codeLanguage=${encodeURIComponent(codeLanguage)}`);
 
       toast({
         title: 'Level Layout Generated!',
@@ -122,16 +124,28 @@ export default function Home() {
               value={gameFolder}
               onChange={(e) => setGameFolder(e.target.value)}
             />
-            <div className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Providing your game folder path allows the AI to:
-            </div>
-            <ul className="text-sm text-muted-foreground list-disc pl-5">
+            </p>
+            <ul>
               <li>1. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
             </ul>
             <div className="text-sm text-muted-foreground">
-              Additionally, if you want the AI to consider specific changes to the level structure or content
+              If you want the AI to consider specific changes to the level structure or content
               based on your existing game's parameters, detail these requirements in a separate document within your game folder.
             </div>
+
+            <Label>Code Language:</Label>
+            <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="JSON">JSON</SelectItem>
+                <SelectItem value="Lua">Lua</SelectItem>
+                <SelectItem value="GDScript">GDScript</SelectItem>
+              </SelectContent>
+            </Select>
             <Button onClick={handleGenerateLevel} disabled={loading}>
               {loading ? 'Generating...' : 'Generate Level Layout'}
             </Button>
@@ -141,3 +155,4 @@ export default function Home() {
     </div>
   );
 }
+
