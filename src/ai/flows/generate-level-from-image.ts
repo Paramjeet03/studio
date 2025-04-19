@@ -1,8 +1,8 @@
 'use server';
 /**
- * @fileOverview Generates a game level layout in JSON format based on an uploaded image.
+ * @fileOverview Generates a game level layout in JSON format based on an uploaded image, incorporating sprites from the provided game folder.
  *
- * - generateLevelFromImage - A function that generates a game level layout from an image.
+ * - generateLevelFromImage - A function that generates a game level layout from an image, including sprite integration.
  * - GenerateLevelInput - The input type for the generateLevelFromImage function.
  * - GenerateLevelOutput - The return type for the generateLevelFromImage function.
  */
@@ -12,17 +12,17 @@ import {z} from 'genkit';
 
 const GenerateLevelInputSchema = z.object({
   imageURL: z.string().describe('The URL of the uploaded image.'),
-  gameFolder: z.string().optional().describe('Path to the game project folder, if available.'),
+  gameFolder: z.string().optional().describe('Path to the game project folder, if available.  This folder should contain a subfolder named "sprites" with available sprite images.'),
   theme: z.string().optional().describe('Optional theme to apply to the level generation.'),
   levelDescription: z.string().optional().describe('Optional user description of the level requirements'),
 });
 export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 
 const GenerateLevelOutputSchema = z.object({
-  levelLayout: z.string().describe('The generated game level layout in JSON format.'),
+  levelLayout: z.string().describe('The generated game level layout in JSON format, including sprite references.'),
   themeSuggestions: z.array(z.string()).describe('Suggested themes derived from the image.'),
+  spriteSuggestions: z.array(z.string()).optional().describe('Suggested sprites from the game folder, if available.'),
   backgroundImageURL: z.string().optional().describe('Suggested background image URL'),
-  spriteImageURL: z.string().optional().describe('Suggested sprite image URL'),
 });
 export type GenerateLevelOutput = z.infer<typeof GenerateLevelOutputSchema>;
 
@@ -74,7 +74,6 @@ Respond with a JSON object containing:
 `,
 });
 
-
 const generateLevelTemplatesPrompt = ai.definePrompt({
   name: 'generateLevelTemplatesPrompt',
   input: {
@@ -85,16 +84,19 @@ const generateLevelTemplatesPrompt = ai.definePrompt({
       composition: z.string().describe('Overall composition and layout of the image'),
       levelType: z.string().describe('Type of level suitable for this image'),
       levelDescription: z.string().optional().describe('User description of level requirements'),
+      spriteSuggestions: z.array(z.string()).optional().describe('List of available sprite names'),
     }),
   },
   output: {
     schema: z.object({
-      levelLayout: z.string().describe('The generated game level layout in JSON format.'),
+      levelLayout: z.string().describe('The generated game level layout in JSON format, including sprite usage.'),
     }),
   },
-  prompt: `You are an expert game level designer. Generate a game level layout in JSON format based on the analysis of the following image. Incorporate the visual elements, composition, and level type to create compelling and engaging level design. The layout should represent a unique interpretation of the image.
+  prompt: `You are an expert game level designer. Generate a game level layout in JSON format based on the analysis of the following image. Incorporate the visual elements, composition, and level type to create compelling and engaging level design. The layout should represent a unique interpretation of the image. Use the provided sprites to add visual details and interactive elements.
   Pay close attention to the level type, and incorporate specific game design elements appropriate for the level type. For example, for a platformer make sure to include adequate platforms, for an adventure game make sure to include rooms, pathways, treasure locations, etc.
   Also use the composition of the image to give you some ideas. For example, if the composition is chaotic, then make the layout feel chaotic and dangerous.
+  In the level layout, include specific instructions or comments on where different sprites should be placed and how they should be used to enhance the gameplay experience.
+  Make sure that all the sprite names that you include in the JSON, exist in the spriteSuggestions list.
 
 Image URL: {{imageURL}}
 Theme: {{theme}}
@@ -102,25 +104,32 @@ Visual Elements: {{elements}}
 Composition: {{composition}}
 Level Type: {{levelType}}
 User Description: {{levelDescription}}
+Available Sprites: {{spriteSuggestions}}
 
 Respond with the generated level layout in JSON format.`,
 });
 
-const suggestScenesTool = ai.defineTool({
-    name: 'suggestScenes',
-    description: 'Suggests relevant scenes from the provided game folder based on the image.',
+const listSpritesTool = ai.defineTool({
+    name: 'listSprites',
+    description: 'Lists available sprite image file names from the provided game folder.',
     inputSchema: z.object({
-      gameFolder: z.string().describe('The path to the game project folder.'),
-      imageURL: z.string().describe('The URL of the uploaded image.'),
+      gameFolder: z.string().describe('The path to the game project folder. This folder should contain a subfolder named "sprites".'),
     }),
-    outputSchema: z.array(z.string()).describe('A list of suggested scene names.'),
+    outputSchema: z.array(z.string()).describe('A list of sprite image file names (e.g., ["player.png", "enemy.png", "platform.png"]).'),
   },
   async input => {
-    // Placeholder implementation: Replace with actual logic to analyze the game folder and image.
-    // and suggest relevant scenes.
+    const {gameFolder} = input;
+    if (!gameFolder) {
+      console.log("No game folder provided, cannot list sprites.");
+      return [];
+    }
+    const spritesFolder = `${gameFolder}/sprites`;
+    console.log("Looking for sprites in:", spritesFolder);
+
+    // Placeholder implementation: Replace with actual logic to read the directory.
+    // and return the sprite names.
     // For now, return a hardcoded list.
-    console.log("Suggesting scenes from game folder", input.gameFolder, "based on image", input.imageURL);
-    return ['scene1', 'scene2', 'scene3'];
+    return ['player.png', 'enemy.png', 'platform.png'];
   }
 );
 
@@ -139,6 +148,9 @@ const generateLevelFromImageFlow = ai.defineFlow<
     detailedImageAnalysisPrompt({ imageURL }),
   ]);
 
+  const {result: spriteListResult} = await listSpritesTool({gameFolder: gameFolder ?? ''});
+  const spriteSuggestions = spriteListResult;
+
   const { output: generateLevelTemplatesOutput } = await generateLevelTemplatesPrompt({
     imageURL,
     theme: theme ?? analyzeImageOutput?.themeSuggestions?.[0] ?? 'generic',
@@ -146,16 +158,16 @@ const generateLevelFromImageFlow = ai.defineFlow<
     composition: detailedAnalysis!.composition,
     levelType: detailedAnalysis!.levelType,
     levelDescription: levelDescription,
+    spriteSuggestions: spriteSuggestions ?? [],
   });
 
   // Generate placeholder image URLs (replace with your logic)
   const backgroundImageURL = `https://picsum.photos/800/600?random=${Math.random()}`; // Example: Random background
-  const spriteImageURL = `https://picsum.photos/100/100?random=${Math.random() + 1}`; // Example: Random sprite
 
   return {
     levelLayout: generateLevelTemplatesOutput!.levelLayout,
     themeSuggestions: analyzeImageOutput!.themeSuggestions,
+    spriteSuggestions: spriteSuggestions,
     backgroundImageURL: backgroundImageURL,
-    spriteImageURL: spriteImageURL,
   };
 });

@@ -81,11 +81,11 @@ export default function Home() {
 
       const levelLayout = result.levelLayout;
       const themeSuggestions = result.themeSuggestions;
+      const spriteSuggestions = result.spriteSuggestions;
       const backgroundImageURL = result.backgroundImageURL;
-      const spriteImageURL = result.spriteImageURL;
 
       // Navigate to the output page with the generated level layout and theme suggestions
-      router.push(`/output?levelLayout=${encodeURIComponent(levelLayout)}&themeSuggestions=${encodeURIComponent(JSON.stringify(themeSuggestions))}&codeLanguage=${encodeURIComponent(codeLanguage)}&backgroundImageURL=${encodeURIComponent(backgroundImageURL ?? '')}&spriteImageURL=${encodeURIComponent(spriteImageURL ?? '')}`);
+      router.push(`/output?levelLayout=${encodeURIComponent(levelLayout)}&themeSuggestions=${encodeURIComponent(JSON.stringify(themeSuggestions))}&spriteSuggestions=${encodeURIComponent(JSON.stringify(spriteSuggestions))}&codeLanguage=${encodeURIComponent(codeLanguage)}&backgroundImageURL=${encodeURIComponent(backgroundImageURL ?? '')}`);
 
       toast({
         title: 'Level Layout Generated!',
@@ -170,4 +170,3 @@ export default function Home() {
     </div>
   );
 }
-
