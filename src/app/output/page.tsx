@@ -27,7 +27,7 @@ export default function OutputPage() {
     const themeSuggestionsString = searchParams.get('themeSuggestions') || '[]';
     const themeSuggestions = JSON.parse(themeSuggestionsString) as string[];
     const spriteSuggestionsString = searchParams.get('spriteSuggestions') || '[]';
-    const spriteSuggestions = JSON.parse(spriteSuggestionsString) as string[];
+    const spriteSuggestions = JSON.parse(spriteSuggestionsString || '[]') as string[];
     const backgroundImageURL = searchParams.get('backgroundImageURL') || '';
     const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
     const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
@@ -158,4 +158,3 @@ export default function OutputPage() {
          </div>
   );
 }
-
