@@ -43,6 +43,36 @@ const analyzeImagePrompt = ai.definePrompt({
   prompt: `Analyze the following image and suggest three themes that would be appropriate for a game level based on its visual elements.\n\nImage URL: {{imageURL}}\n\nRespond with a JSON array of strings, where each string is a suggested theme.`, 
 });
 
+const detailedImageAnalysisPrompt = ai.definePrompt({
+  name: 'detailedImageAnalysisPrompt',
+  input: {
+    schema: z.object({
+      imageURL: z.string().describe('The URL of the uploaded image.'),
+    }),
+  },
+  output: {
+    schema: z.object({
+      elements: z.array(z.string()).describe('Key visual elements detected in the image (e.g., mountains, water, buildings).'),
+      composition: z.string().describe('Overall composition and layout of the image (e.g., centered, chaotic, balanced).'),
+      colorPalette: z.array(z.string()).describe('Dominant colors and their shades in the image.'),
+      levelType: z.string().describe('A description of the type of level most suitable for the image (e.g platformer, puzzle, adventure)'),
+    }),
+  },
+  prompt: `You are an AI assistant designed to analyze images and provide a detailed breakdown for game level generation.
+
+Analyze the provided image focusing on elements that can be translated into game level design. Provide the visual elements, composition, color palette and level type for the image.
+
+Image URL: {{imageURL}}
+
+Respond with a JSON object containing:
+- elements: An array of strings, each describing a key visual element detected in the image (e.g., mountains, water, buildings).
+- composition: A brief description of the overall composition and layout of the image (e.g., centered, chaotic, balanced).
+- colorPalette: An array of strings, listing the dominant colors and their shades in the image.
+- levelType: A description of the type of level most suitable for the image (e.g platformer, puzzle, adventure)
+`,
+});
+
+
 const generateLevelPrompt = ai.definePrompt({
   name: 'generateLevelPrompt',
   input: {
@@ -50,6 +80,9 @@ const generateLevelPrompt = ai.definePrompt({
       imageURL: z.string().describe('The URL of the uploaded image.'),
       theme: z.string().optional().describe('The theme to use for level generation.'),
       suggestedScenes: z.array(z.string()).optional().describe('List of available game scenes for layout suggestions'),
+      elements: z.array(z.string()).describe('Key visual elements detected in the image'),
+      composition: z.string().describe('Overall composition and layout of the image'),
+      levelType: z.string().describe('Type of level suitable for this image'),
     }),
   },
   output: {
@@ -57,8 +90,18 @@ const generateLevelPrompt = ai.definePrompt({
       levelLayout: z.string().describe('The generated game level layout in JSON format.'),
     }),
   },
-  prompt: `Generate a game level layout in JSON format based on the visual elements of the following image, using the specified theme. If there are some provided game scenes, apply the context of the game scenes while generating the level layout.\n\nImage URL: {{imageURL}}\nTheme: {{theme}}\nGame Scenes: {{suggestedScenes}}
-\nRespond with a JSON object representing the level layout.`, 
+  prompt: `You are an expert game level designer. Generate a detailed and imaginative game level layout in JSON format based on the analysis of the following image. Incorporate the visual elements, composition, and level type to create a compelling and engaging level design.
+  Pay close attention to the level type, and incorporate specific game design elements appropriate for the level type. For example, for a platformer make sure to include adequate platforms, for an adventure game make sure to include rooms, pathways, treasure locations, etc.
+  Also use the composition of the image to give you some ideas. For example, if the composition is chaotic, then make the layout feel chaotic and dangerous.
+
+Image URL: {{imageURL}}
+Theme: {{theme}}
+Game Scenes: {{suggestedScenes}}
+Visual Elements: {{elements}}
+Composition: {{composition}}
+Level Type: {{levelType}}
+
+Respond with a JSON object representing the level layout.`,
 });
 
 const suggestScenesTool = ai.defineTool({
@@ -89,15 +132,19 @@ const generateLevelFromImageFlow = ai.defineFlow<
 }, async input => {
   const { imageURL, theme, gameFolder } = input;
 
-  const [{ output: analyzeImageOutput }, suggestedScenes] = await Promise.all([
+  const [{ output: analyzeImageOutput }, suggestedScenes, { output: detailedAnalysis }] = await Promise.all([
     analyzeImagePrompt({ imageURL }),
     gameFolder ? suggestScenesTool({ gameFolder, imageURL }) : Promise.resolve([]),
+    detailedImageAnalysisPrompt({ imageURL }),
   ]);
 
   const { output: generateLevelOutput } = await generateLevelPrompt({
     imageURL,
     theme: theme ?? analyzeImageOutput?.themeSuggestions?.[0] ?? 'generic',
     suggestedScenes,
+    elements: detailedAnalysis!.elements,
+    composition: detailedAnalysis!.composition,
+    levelType: detailedAnalysis!.levelType,
   });
 
   return {

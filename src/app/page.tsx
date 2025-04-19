@@ -105,8 +105,12 @@ export default function Home() {
           <CardContent className="flex flex-col space-y-4">
             <Label htmlFor="image-upload">Upload Image:</Label>
             <Input id="image-upload" type="file" accept="image/*" onChange={handleImageUpload} />
-            {imageURL && (
+            {imageURL ? (
               <img src={imageURL} alt="Uploaded" className="max-h-64 object-contain rounded-md" />
+            ) : (
+              <div className="max-h-64 flex items-center justify-center rounded-md border-2 border-dashed border-gray-400 bg-gray-100">
+                <span className="text-gray-500">Upload an image or sketch here</span>
+              </div>
             )}
             <Label htmlFor="game-folder">Game Folder (optional):</Label>
             <Input
