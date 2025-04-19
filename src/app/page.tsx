@@ -144,6 +144,9 @@ export default function Home() {
                 <SelectItem value="JSON">JSON</SelectItem>
                 <SelectItem value="Lua">Lua</SelectItem>
                 <SelectItem value="GDScript">GDScript</SelectItem>
+                <SelectItem value="C#">C#</SelectItem>
+                <SelectItem value="Python">Python</SelectItem>
+                <SelectItem value="C++">C++</SelectItem>
               </SelectContent>
             </Select>
             <Button onClick={handleGenerateLevel} disabled={loading}>
@@ -155,4 +158,5 @@ export default function Home() {
     </div>
   );
 }
+
 
