@@ -16,7 +16,6 @@ export default function Home() {
   const [gameFolder, setGameFolder] = useState('');
   const [levelLayout, setLevelLayout] = useState('');
   const [themes, setThemes] = useState<string[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState('');
   const [loading, setLoading] = useState(false);
   const {toast} = useToast();
 
@@ -46,7 +45,6 @@ export default function Home() {
       const result = await generateLevelFromImage({
         imageURL,
         gameFolder,
-        theme: selectedTheme,
       });
 
       setLevelLayout(result.levelLayout);
@@ -68,7 +66,15 @@ export default function Home() {
     }
   };
 
-  const handleExportLevel = () => {
+  const createFolder = (folderName: string, files: { name: string; content: string }[]) => {
+    const zip = new JSZip();
+    files.forEach(file => {
+      zip.file(`${folderName}/${file.name}`, file.content);
+    });
+    return zip.generateAsync({ type: "blob" });
+  };
+
+  const handleExportLevel = async () => {
     if (!levelLayout) {
       toast({
         title: 'Error',
@@ -78,20 +84,40 @@ export default function Home() {
       return;
     }
 
-    const blob = new Blob([levelLayout], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'level.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    // Determine file extension based on game folder or default to JSON
+    const fileExtension = gameFolder ? '.json' : '.json';
+    const levelFileName = `level${fileExtension}`;
+    const aiFileName = `ai_generated_content${fileExtension}`;
 
-    toast({
-      title: 'Level Exported!',
-      description: 'Level layout has been exported as level.json',
+    // For this example, we'll create two files: level.json and ai_generated_content.json
+    const files = [
+      { name: levelFileName, content: levelLayout },
+      { name: aiFileName, content: JSON.stringify({ themes }) }, // Example of AI content
+    ];
+
+    // Create a zip file containing the level files
+    const zipFileName = 'level_pack.zip';
+    const zip = new JSZip();
+    files.forEach(file => {
+      zip.file(file.name, file.content);
     });
+
+    zip.generateAsync({ type: "blob" })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = zipFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: 'Level Exported!',
+          description: `Level files have been exported as ${zipFileName}`,
+        });
+      });
   };
 
   return (
@@ -125,28 +151,11 @@ export default function Home() {
               Providing your game folder path allows the AI to:
               <ul>
                 <li>1. Tailor the level creation based on existing game variables, functions, language, and engine.</li>
-                <li>2.  Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
+                <li>2. Determine the correct file extension for exporting the level data (e.g., .json, .lua, .gd).</li>
               </ul>
               Additionally, if you want the AI to consider specific changes to the level structure or content
               based on your existing game's parameters, detail these requirements in a separate document within your game folder.
             </div>
-            {themes.length > 0 && (
-              <>
-                <Label>Select Theme:</Label>
-                <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {themes.map((theme) => (
-                      <SelectItem key={theme} value={theme}>
-                        {theme}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </>
-            )}
             <Button onClick={handleGenerateLevel} disabled={loading}>
               {loading ? 'Generating...' : 'Generate Level Layout'}
             </Button>
