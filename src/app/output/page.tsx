@@ -26,7 +26,7 @@ export default function OutputPage() {
     const levelLayout = searchParams.get('levelLayout') || '';
     const themeSuggestionsString = searchParams.get('themeSuggestions') || '[]';
     const themeSuggestions = JSON.parse(themeSuggestionsString) as string[];
-    const spriteSuggestionsString = searchParams.get('spriteSuggestions') || '[]';
+    const spriteSuggestionsString = searchParams.get('spriteSuggestions') ?? '[]';
     const spriteSuggestions = JSON.parse(spriteSuggestionsString || '[]') as string[];
     const backgroundImageURL = searchParams.get('backgroundImageURL') || '';
     const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
@@ -149,13 +149,13 @@ export default function OutputPage() {
                                          />
                                      </form>
                                  </Form>
-+
+
                                  <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
                                      {loading ? 'Downloading...' : 'Download Level'}
                                  </Button>
-+
+
                          </div>
-+
+
                     </CardContent>
                </Card>
           </div>
