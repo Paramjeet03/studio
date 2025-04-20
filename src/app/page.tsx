@@ -1,6 +1,6 @@
 'use client';
 
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
@@ -8,8 +8,7 @@ import {Label} from '@/components/ui/label';
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {useRouter} from 'next/navigation';
-import {useEffect} from 'react';
-import JSZip from 'jszip'; // Import JSZip
+import JSZip from 'jszip';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -32,9 +31,8 @@ export default function Home() {
   const {toast} = useToast();
   const router = useRouter();
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-  const [codeLanguage, setCodeLanguage] = useState('JSON'); // Default to JSON
+  const [codeLanguage, setCodeLanguage] = useState('JSON');
 
-  // Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -76,16 +74,24 @@ export default function Home() {
       const result = await generateLevelFromImage({
         imageURL,
         gameFolder,
-        levelDescription: form.getValues().levelDescription, // Send Level description to AI flow
+        levelDescription: form.getValues().levelDescription,
       });
 
-      const levelLayout = result.levelLayout;
-      const themeSuggestions = result.themeSuggestions;
-      const spriteSuggestions = result.spriteSuggestions;
-      const backgroundImageURL = result.backgroundImageURL;
+      const levelLayout = result.levelLayout ?? '';
+      const themeSuggestions = result.themeSuggestions ?? [];
+      const spriteSuggestions = result.spriteSuggestions ?? [];
+      const backgroundImageURL = result.backgroundImageURL ?? '';
 
-      // Navigate to the output page with the generated level layout and theme suggestions
-      router.push(`/output?levelLayout=${encodeURIComponent(levelLayout)}&themeSuggestions=${encodeURIComponent(JSON.stringify(themeSuggestions))}&spriteSuggestions=${encodeURIComponent(JSON.stringify(spriteSuggestions))}&codeLanguage=${encodeURIComponent(codeLanguage)}&backgroundImageURL=${encodeURIComponent(backgroundImageURL ?? '')}`);
+      // Encode data safely to avoid "undefined" or invalid JSON parse errors
+      const queryParams = new URLSearchParams({
+        levelLayout: encodeURIComponent(levelLayout),
+        themeSuggestions: encodeURIComponent(JSON.stringify(themeSuggestions)),
+        spriteSuggestions: encodeURIComponent(JSON.stringify(spriteSuggestions)),
+        codeLanguage: encodeURIComponent(codeLanguage),
+        backgroundImageURL: encodeURIComponent(backgroundImageURL),
+      });
+
+      router.push(`/output?${queryParams.toString()}`);
 
       toast({
         title: 'Level Layout Generated!',
@@ -122,7 +128,7 @@ export default function Home() {
                 <span className="text-gray-500">Upload an image or sketch here</span>
               </div>
             )}
-             <Label htmlFor="level-description">Describe more about Level (optional):</Label>
+            <Label htmlFor="level-description">Describe more about Level (optional):</Label>
             <Textarea
               id="level-description"
               placeholder="Describe any specific requirements or ideas for the level"

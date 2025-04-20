@@ -42,7 +42,7 @@ const analyzeImagePrompt = ai.definePrompt({
       themeSuggestions: z.array(z.string()).describe('Suggested themes derived from the image.'),
     }),
   },
-  prompt: `Analyze the following image and suggest three themes that would be appropriate for a game level based on its visual elements.\n\nImage URL: {{imageURL}}\n\nRespond with a JSON array of strings, where each string is a suggested theme.`, 
+  prompt: `Analyze the following image and suggest three themes that would be appropriate for a game level based on its visual elements.\n\nImage URL: {{imageURL}}\n\nRespond with a JSON array of strings, where each string is a suggested theme.`,
 });
 
 const detailedImageAnalysisPrompt = ai.definePrompt({

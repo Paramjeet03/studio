@@ -41,8 +41,8 @@ export default function OutputPage() {
      const form = useForm<z.infer<typeof formSchema>>({
          resolver: zodResolver(formSchema),
          defaultValues: {
-             theme: themeSuggestions[0] || '',
-          background: backgroundImageURL,
+             theme: themeSuggestions[0] || '', // Default to the first theme suggestion if available
+        background: backgroundImageURL,
          },
      });
 
@@ -54,14 +54,15 @@ export default function OutputPage() {
 
      function onSubmit(values: z.infer<typeof formSchema>) {
          toast({
+
              title: 'You submitted the following values:',
              description: JSON.stringify(values, null, 2),
          });
      }
- 
+
      const handleDownloadLevel = async () => {
          setLoading(true);
- 
+
          try {
               const files = [
                   { name: 'level.json', content: levelLayout },
@@ -69,21 +70,21 @@ export default function OutputPage() {
                   { name: 'background.txt', content: selectedBackground || 'default_background' },
                   { name: 'sprites.txt', content: spriteSuggestions.join('\n') || 'no_sprites' }, // List of sprites
               ];
- 
+
               // Create a zip file containing the level files
               const zipFileName = 'level_pack.zip';
               const zip = new JSZip();
               files.forEach(file => {
                   zip.file(file.name, file.content);
               });
- 
+
               // Generate the zip file as a blob
               const blob = await zip.generateAsync({ type: "blob" });
- 
+
               // Create a download link for the zip file
               const url = URL.createObjectURL(blob);
               setGeneratedLevelURL(url);
- 
+
               // Programmatically trigger the download
               const a = document.createElement('a');
               a.href = url;
@@ -91,9 +92,9 @@ export default function OutputPage() {
               document.body.appendChild(a);
               a.click();
               document.body.removeChild(a);
- 
+
               URL.revokeObjectURL(url);
- 
+
               toast({
                   title: 'Level Download Started',
                   description: 'Your level is now being downloaded as a zip file.',
@@ -109,7 +110,7 @@ export default function OutputPage() {
               setLoading(false);
          }
      };
- 
+
 
   return (
          <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -122,7 +123,7 @@ export default function OutputPage() {
                         </CardDescription>
                    </CardHeader>
                    <CardContent className="grid gap-4">
- 
+
                         <div className="border p-4 rounded-md">
                              <h3 className="text-xl font-semibold mb-2">Theme Selection</h3>
                              <p>Choose a theme to customize your level:</p>
@@ -149,16 +150,34 @@ export default function OutputPage() {
                                          />
                                      </form>
                                  </Form>
-
-                                 <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
-                                     {loading ? 'Downloading...' : 'Download Level'}
-                                 </Button>
++
++                               {spriteSuggestions && spriteSuggestions.length > 0 && (
++                                    <div className="mt-4">
++                                        <h4 className="text-lg font-semibold mb-2">Available Sprites</h4>
++                                        <div className="flex flex-wrap gap-2">
++                                            {spriteSuggestions.map((sprite, index) => (
++                                                <div key={index} className="border rounded-md p-2">
++                                                    <Label>{sprite}</Label>
++                                                    {/* Replace with actual sprite image display if possible */}
++                                                    {/* For now, just show the sprite name */}
++                                                </div>
++                                            ))}
++                                        </div>
++                                    </div>
++                                )}
+                                  <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
+                                      {loading ? 'Downloading...' : 'Download Level'}
+                                  </Button>
 
                          </div>
-
-                    </CardContent>
-               </Card>
++
++
++
++
+ 
+                     </CardContent>
+                </Card>
           </div>
-   );
++
+    );
 }
-
