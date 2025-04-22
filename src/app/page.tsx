@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-import { Button } from '@/components/ui/button';
+import {useState, useCallback} from 'react';
+import {useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {Button} from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -14,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {Label} from '@/components/ui/label';
+import {Textarea} from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -23,13 +22,11 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
-import { Icons } from '@/components/icons';
-import { useDropzone } from 'react-dropzone';
-import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+import {useToast} from '@/hooks/use-toast';
+import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
+import {Icons} from '@/components/icons';
+import {useDropzone} from 'react-dropzone';
 import Link from 'next/link';
-// import { useAuth } from '@/components/auth-provider';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -38,11 +35,11 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  { label: 'Python', value: 'python' },
-  { label: 'Lua', value: 'lua' },
-  { label: 'GDScript', value: 'gdscript' },
-  { label: 'C#', value: 'csharp' },
-  { label: 'C++', value: 'cpp' },
+  {label: 'Python', value: 'python'},
+  {label: 'Lua', value: 'lua'},
+  {label: 'GDScript', value: 'gdscript'},
+  {label: 'C#', value: 'csharp'},
+  {label: 'C++', value: 'cpp'},
 ];
 
 export default function Home() {
@@ -50,9 +47,8 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
 
-  const { toast } = useToast();
+  const {toast} = useToast();
   const router = useRouter();
-  // const { user, loading: authLoading } = useAuth();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -72,7 +68,7 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -106,9 +102,10 @@ export default function Home() {
         return;
       }
 
-      const { levelLayout } = result;
-
-      const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
+      const levelLayout = result.levelLayout;
+      const url = `/output?levelLayout=${encodeURIComponent(
+        levelLayout
+      )}&codeLanguage=${codeLanguage}`;
       router.push(url);
 
       toast({
@@ -176,21 +173,8 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
-      {/* {authLoading ? (
-        <p>Checking authentication...</p>
-      ) : user ? (
-        <>
-          <p>Welcome, {user.displayName || user.email}!</p>
-          <Button variant="secondary" onClick={() => getAuth().signOut()}>
-            Sign Out
-          </Button>
-        </>
-      ) : (
-        null
-      )} */}
-
       <div className="flex w-full max-w-4xl space-x-4">
-        <Card className="w-full">
+        <Card className="w-full dark:bg-black dark:text-slate-200 dark:border-cyan-400">
           <CardHeader>
             <CardTitle>Level Generator</CardTitle>
             <CardDescription>
@@ -212,21 +196,29 @@ export default function Home() {
                 </Button>
               </div>
             ) : (
-              <div {...getRootProps()} className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer">
+              <div
+                {...getRootProps()}
+                className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer dark:bg-gray-800 dark:border-gray-600"
+              >
                 <input {...getInputProps()} />
-                {
-                  isDragActive ?
-                    <p>Drop the files here ...</p> :
-                    <p>Drag 'n' drop some files here, or click to select files</p>
-                }
+                {isDragActive ? (
+                  <p className="dark:text-slate-200">Drop the files here ...</p>
+                ) : (
+                  <p className="dark:text-slate-200">
+                    Drag 'n' drop some files here, or click to select files
+                  </p>
+                )}
               </div>
             )}
 
-            <Label htmlFor="level-description">Level Description (optional):</Label>
+            <Label htmlFor="level-description">
+              Level Description (optional):
+            </Label>
             <Textarea
               id="level-description"
               placeholder="Describe any specific requirements or ideas for the level"
               {...form.register('levelDescription')}
+              className="dark:bg-black dark:text-slate-200 dark:border-cyan-400"
             />
 
             <Button onClick={handleGenerateDescription} disabled={loading}>
@@ -241,11 +233,14 @@ export default function Home() {
             </Button>
 
             <Label htmlFor="code-language">Code Language:</Label>
-            <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
-              <SelectTrigger className="w-[180px]">
+            <Select
+              onValueChange={setCodeLanguage}
+              defaultValue={codeLanguage}
+            >
+              <SelectTrigger className="w-[180px] dark:bg-black dark:text-slate-200 dark:border-cyan-400">
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="dark:bg-black dark:text-slate-200 dark:border-cyan-400">
                 {codeLanguageOptions.map((lang) => (
                   <SelectItem key={lang.value} value={lang.value}>
                     {lang.label}
