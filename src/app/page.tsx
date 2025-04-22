@@ -28,7 +28,6 @@ import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
-import Logo from "@/components/Logo";
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -166,9 +165,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
-        <div className="mb-8">
-            <Logo />
-        </div>
+        
 
         <Card className="w-full max-w-4xl dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400 dark:focus-visible:ring-cyan-400">
             <CardHeader>
