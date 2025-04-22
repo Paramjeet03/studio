@@ -6,8 +6,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
-import { generateLevelDescription } from '@/ai/flows/generate-level-description';
-
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
 import { Icons } from '@/components/icons';
 import { Slider } from "@/components/ui/slider"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -53,8 +52,6 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
     const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
-    const [suggestionLevel, setSuggestionLevel] = useState<number>(50); // Default suggestion level
-    const [suggestedDescription, setSuggestedDescription] = useState<string>('');
 
 
   const { toast } = useToast();
@@ -97,30 +94,9 @@ export default function Home() {
       setLoading(true);
       try {
           const values = form.getValues();
-          let finalLevelDescription = values.levelDescription;
-
-          if (autoSuggest) {
-              // Generate level description using AI
-              const aiDescriptionResult = await generateLevelDescription({
-                  imageURL: imageURL,
-                  levelDescription: values.levelDescription,
-                  suggestionLevel: suggestionLevel, // Pass the suggestion level to the AI flow
-              });
-
-              if (aiDescriptionResult && aiDescriptionResult.description) {
-                  finalLevelDescription = aiDescriptionResult.description;
-              } else {
-                  toast({
-                      title: 'Suggestion Error',
-                      description: 'Failed to generate level description suggestions.',
-                      variant: 'destructive',
-                  });
-              }
-          }
-
           const result = await generateLevelFromImage({
               imageURL,
-              levelDescription: finalLevelDescription,
+              levelDescription: values.levelDescription,
               codeLanguage,
           });
 
@@ -196,32 +172,13 @@ export default function Home() {
 
              <div className="flex items-center space-x-2">
                         <Label htmlFor="auto-suggest">Enable Auto-Suggestions:</Label>
-                        <Input
-                            type="checkbox"
+                        <Checkbox
                             id="auto-suggest"
                             checked={autoSuggest}
-                            onChange={(e) => setAutoSuggest(e.target.checked)}
+                            onCheckedChange={(e) => setAutoSuggest(e)}
                             className="ml-2"
                         />
                     </div>
-
-                    {autoSuggest && (
-                        <>
-                            <Label htmlFor="suggestion-level">Suggestion Level:</Label>
-                            <Slider
-                                id="suggestion-level"
-                                defaultValue={[suggestionLevel]}
-                                max={100}
-                                step={1}
-                                aria-label="Suggestion Level"
-                                onValueChange={(value) => setSuggestionLevel(value[0])}
-                                className="w-full"
-                            />
-                            <p className="text-sm text-muted-foreground">
-                                Adjust the level of AI-generated suggestions (0-100).
-                            </p>
-                        </>
-                    )}
 
 
             <Label htmlFor="level-description">
