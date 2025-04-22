@@ -28,6 +28,8 @@ import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+import { Alert, AlertDescription as AD, AlertTitle as AT } from "@/components/ui/alert";
+
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
