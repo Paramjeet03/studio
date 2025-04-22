@@ -50,20 +50,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       initializedApp = initializeApp(firebaseConfig);
       setApp(initializedApp);
-    } catch (error: any) {
-      console.error("Firebase initialization error:", error.message);
+    } catch (initializeAppError: any) {
+      console.error("Firebase initialization error:", initializeAppError.message);
       setLoading(false);
       return;
     }
 
-    const auth = getAuth(initializedApp);
+    try {
+      const auth = getAuth(initializedApp);
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        setUser(user);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (authError: any) {
+      console.error("Authentication error:", authError.message);
       setLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
 
   const value: AuthContextProps = { app, user, loading };
