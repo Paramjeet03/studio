@@ -26,7 +26,6 @@ import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {Icons} from '@/components/icons';
 import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
-import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 
@@ -310,9 +309,11 @@ export default function Home() {
                 {improvementSuggestions && (
                   <div className="mt-4">
                     <Label>Improvement Suggestions:</Label>
-                    <Alert>
-                      <AlertDescription>{improvementSuggestions}</AlertDescription>
-                    </Alert>
+                      <Card className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400">
+                        <CardContent>
+                          {improvementSuggestions}
+                        </CardContent>
+                      </Card>
                   </div>
                 )}
 
@@ -321,4 +322,5 @@ export default function Home() {
     </div>
   );
 }
+
 
