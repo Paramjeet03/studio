@@ -29,7 +29,7 @@ import {codeLanguageOptions} from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 import { Alert, AlertDescription as AD, AlertTitle as AT } from "@/components/ui/alert";
-
+import { Copy } from 'lucide-react';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -205,6 +205,24 @@ export default function Home() {
 
   const [generatedDescription, setGeneratedDescription] = useState<string>('');
 
+    const handleCopySuggestions = () => {
+        navigator.clipboard.writeText(improvementSuggestions)
+            .then(() => {
+                toast({
+                    title: "Suggestions Copied",
+                    description: "Level improvement suggestions copied to clipboard.",
+                });
+            })
+            .catch(err => {
+                toast({
+                    title: "Copy Failed",
+                    description: "Failed to copy suggestions to clipboard.",
+                    variant: "destructive",
+                });
+                console.error("Failed to copy text: ", err);
+            });
+    };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
        <h1 className="text-3xl font-bold mb-2">LevelUp AI</h1>
@@ -319,6 +337,10 @@ export default function Home() {
                                 <li key={index} className="list-disc ml-4">{suggestion}</li>
                               ))}
                             </ul>
+                                <Button variant="secondary" size="sm" onClick={handleCopySuggestions}>
+                                    <Copy className="h-4 w-4 mr-2" />
+                                    Copy Suggestions
+                                </Button>
                         </CardContent>
                       </Card>
                   </div>
@@ -329,3 +351,4 @@ export default function Home() {
     </div>
   );
 }
+
