@@ -165,7 +165,10 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
-        
+       <h1 className="text-3xl font-bold mb-2">LevelUp AI</h1>
+        <p className="text-sm text-muted-foreground mb-4">
+            Unleash your level design potential.
+        </p>
 
         <Card className="w-full max-w-4xl dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400 dark:focus-visible:ring-cyan-400">
             <CardHeader>
