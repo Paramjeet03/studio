@@ -142,7 +142,6 @@ export default function Home() {
       const result = await generateLevelDescription({
         imageURL,
         levelDescription: form.getValues().levelDescription,
-        suggestionLevel: 75, // You can adjust the suggestion level as needed
       });
 
       if (!result || !result.description) {
@@ -187,12 +186,7 @@ export default function Home() {
           </Button>
         </>
       ) : (
-        <div className="mb-4">
-          <Link href="/login" className="mr-4">
-            Login
-          </Link>
-          <Link href="/signup">Sign Up</Link>
-        </div>
+        null
       )}
 
       <div className="flex w-full max-w-4xl space-x-4">
