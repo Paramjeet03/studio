@@ -1,13 +1,13 @@
 'use client';
 
-import {useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {useForm} from 'react-hook-form';
-import {z} from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -15,8 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -24,9 +24,9 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import {useToast} from '@/hooks/use-toast';
-import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import {Icons} from '@/components/icons';
+import { useToast } from '@/hooks/use-toast';
+import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
+import { Icons } from '@/components/icons';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -35,19 +35,21 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  {label: 'Python', value: 'python'},
-  {label: 'Lua', value: 'lua'},
-  {label: 'GDScript', value: 'gdscript'},
-  {label: 'C#', value: 'csharp'},
-  {label: 'JSON', value: 'json'},
+  { label: 'Python', value: 'python' },
+  { label: 'Lua', value: 'lua' },
+  { label: 'GDScript', value: 'gdscript' },
+  { label: 'C#', value: 'csharp' },
+  { label: 'JSON', value: 'json' },
 ];
+
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
 
-  const {toast} = useToast();
+
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -92,24 +94,25 @@ export default function Home() {
         codeLanguage,
       });
 
-      if (!result) {
-            toast({
-                title: 'Error',
-                description: 'Failed to generate level. Please try again.',
-                variant: 'destructive',
-            });
-            return;
-        }
+      if (!result || !result.levelLayout) {
+        toast({
+          title: 'Error',
+          description: 'Failed to generate level. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      const {levelLayout = ''} = result || {};
+      const { levelLayout } = result;
+
 
       const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
-       router.push(url);
+      router.push(url);
+
       toast({
         title: 'Level Layout Generated!',
         description: 'Customize your level file on the next page.',
       });
-
     } catch (error: any) {
       console.error('Error generating level:', error);
       toast({
@@ -121,6 +124,7 @@ export default function Home() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -139,7 +143,6 @@ export default function Home() {
             <Label htmlFor="image-upload">
               Upload Image:
             </Label>
-
             {imageURL ? (
               <>
                 <img
@@ -161,10 +164,10 @@ export default function Home() {
                   className="hidden"
                 />
                 <Label htmlFor="image-upload" className="cursor-pointer">
-                 <Button asChild>
-                     <div className="flex items-center">
-                        Select Image <Icons.upload className="ml-2 h-4 w-4" />
-                     </div>
+                  <Button asChild>
+                    <>
+                      Select Image <Icons.upload className="ml-2 h-4 w-4" />
+                    </>
                   </Button>
                 </Label>
               </>
@@ -194,9 +197,8 @@ export default function Home() {
                 ))}
               </SelectContent>
             </Select>
-
             <Button onClick={handleGenerateLevel} disabled={loading}>
-              {loading ? 'Generating...' : 'Generate Level Layout'}
+              {loading ? 'Generate Level Layout' : 'Generate Level Layout'}
             </Button>
           </CardContent>
         </Card>
@@ -204,4 +206,3 @@ export default function Home() {
     </div>
   );
 }
-

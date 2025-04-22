@@ -5,13 +5,15 @@
  * - generateLevelFromImage - A function that generates a game level layout from an image and description.
  */
 
-import {ai} from '@/ai/ai-instance';
-import {z} from 'genkit';
+import { ai } from '@/ai/ai-instance';
+import { z } from 'genkit';
 
 const GenerateLevelInputSchema = z.object({
   imageURL: z.string().describe('The URL of the uploaded image.'),
   levelDescription: z.string().optional().describe('Optional user description of the level requirements'),
   codeLanguage: z.string().describe('The coding language for the level file. Supported languages are python, lua, gdscript, csharp, json'),
+  repoUrl: z.string().optional().describe('Optional repository URL for pushing the code.'),
+  repoToken: z.string().optional().describe('Optional repository token for authentication.'),
 });
 export type GenerateLevelInput = z.infer<typeof GenerateLevelInputSchema>;
 
@@ -31,6 +33,8 @@ const generateLevelTemplatesPrompt = ai.definePrompt({
       imageURL: z.string().describe('The URL of the uploaded image.'),
       levelDescription: z.string().optional().describe('User description of level requirements'),
       codeLanguage: z.string().describe('The coding language for the level file. Supported languages are python, lua, gdscript, csharp, json'),
+      repoUrl: z.string().optional().describe('Optional repository URL for pushing the code.'),
+      repoToken: z.string().optional().describe('Optional repository token for authentication.'),
     }),
   },
   output: {
@@ -44,6 +48,8 @@ Ensure that you return the code without any additional explanations or conversat
 Image URL: {{imageURL}}
 User Description: {{levelDescription}}
 Coding Language: {{codeLanguage}}
+Repository URL: {{repoUrl}}
+Repository Token: {{repoToken}}
 
 Here's an example format for the level layout code:
 
@@ -82,13 +88,15 @@ const generateLevelFromImageFlow = ai.defineFlow<
   inputSchema: GenerateLevelInputSchema,
   outputSchema: GenerateLevelOutputSchema,
 }, async input => {
-  const { imageURL, theme, levelDescription, codeLanguage } = input;
+  const { imageURL, theme, levelDescription, codeLanguage, repoUrl, repoToken } = input;
 
   try {
         const { output: generateLevelTemplatesOutput } = await generateLevelTemplatesPrompt({
             imageURL,
             levelDescription: levelDescription,
             codeLanguage: codeLanguage,
+            repoUrl: repoUrl,
+            repoToken: repoToken,
         });
         if (!generateLevelTemplatesOutput) {
             console.error('AI prompt returned empty output');
