@@ -70,9 +70,9 @@ export default function Home() {
     reader.readAsDataURL(file);
   };
 
-  const handleRemoveImage = () => {
-    setImageURL('');
-  };
+    const handleRemoveImage = () => {
+        setImageURL('');
+    };
 
   const handleGenerateLevel = async () => {
     if (!imageURL) {
