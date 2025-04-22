@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,7 +28,8 @@ import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
 import { Icons } from '@/components/icons';
 import { useDropzone } from 'react-dropzone';
 import { generateLevelDescription } from '@/ai/flows/generate-level-description';
-import { Switch } from "@/components/ui/switch";
+import Link from 'next/link';
+import { useAuth } from '@/components/auth-provider';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -48,11 +49,10 @@ export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
-  const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
-  const [generatedDescription, setGeneratedDescription] = useState<string>('');
 
   const { toast } = useToast();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -154,8 +154,8 @@ export default function Home() {
         return;
       }
 
-      setGeneratedDescription(result.description);
-      form.setValue('levelDescription', result.description);
+      const resultDescription = result.description;
+      form.setValue('levelDescription', resultDescription);
 
       toast({
         title: 'Level Description Generated!',
@@ -176,6 +176,24 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+
+      {authLoading ? (
+        <p>Checking authentication...</p>
+      ) : user ? (
+        <>
+          <p>Welcome, {user.displayName || user.email}!</p>
+          <Button variant="secondary" onClick={() => getAuth().signOut()}>
+            Sign Out
+          </Button>
+        </>
+      ) : (
+        <div className="mb-4">
+          <Link href="/login" className="mr-4">
+            Login
+          </Link>
+          <Link href="/signup">Sign Up</Link>
+        </div>
+      )}
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full">
