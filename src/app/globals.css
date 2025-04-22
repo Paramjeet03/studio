@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 210 30% 8%; /* Dark Gray/Slate */
+    --foreground: 180 10% 80%; /* Light Cyan */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --popover: 210 30% 8%;
+    --popover-foreground: 180 10% 80%;
+    --card: 210 30% 8%;
+    --card-foreground: 180 10% 80%;
+    --border: 180 5% 40%; /* Cyan */
+    --input: 180 5% 40%; /* Cyan */
+    --primary: 180 50% 40%; /* Cyan */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 180 5% 40%; /* Cyan */
+    --secondary-foreground: 180 10% 80%;
+    --accent: 180 50% 40%; /* Cyan */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 180 5% 40%; /* Cyan */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 210 30% 8%; /* Dark Gray/Slate */
+    --foreground: 180 10% 80%; /* Light Cyan */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --popover: 210 30% 8%;
+    --popover-foreground: 180 10% 80%;
+    --card: 210 30% 8%;
+    --card-foreground: 180 10% 80%;
+    --border: 180 5% 40%; /* Cyan */
+    --input: 180 5% 40%; /* Cyan */
+    --primary: 180 50% 40%; /* Cyan */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 180 5% 40%; /* Cyan */
+    --secondary-foreground: 180 10% 80%;
+    --accent: 180 50% 40%; /* Cyan */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --ring: 180 5% 40%; /* Cyan */
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
