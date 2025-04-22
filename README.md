@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+[![Netlify Status](https://api.netlify.com/api/v1/badges/bbf68d4f-bc1c-467a-9630-9461a5d63f8e/deploy-status)](https://app.netlify.com/sites/friendly-sprinkles-1ccbca/deploys)
 # LevelUp - AI-Powered Game Level Code Generator
 
 **LevelUp** is an AI-powered web application that accelerates the **game development process** by converting sketches or level images into **functional game code templates**. It enhances the workflow for game developers, from visual concepts to ready-to-edit code in just a few clicks.
