@@ -6,6 +6,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useDropzone } from 'react-dropzone';
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +30,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
 import { Icons } from '@/components/icons';
+import { Slider } from "@/components/ui/slider"
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -49,6 +52,9 @@ export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
+    const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
+    const [suggestionLevel, setSuggestionLevel] = useState<number>(50); // Default suggestion level
+    const [suggestedDescription, setSuggestedDescription] = useState<string>('');
 
 
   const { toast } = useToast();
@@ -79,54 +85,73 @@ export default function Home() {
     };
 
   const handleGenerateLevel = async () => {
-    if (!imageURL) {
-      toast({
-        title: 'Error',
-        description: 'Please upload an image first.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const values = form.getValues();
-
-      const result = await generateLevelFromImage({
-        imageURL,
-        levelDescription: values.levelDescription,
-        codeLanguage,
-      });
-
-      if (!result || !result.levelLayout) {
-        toast({
-          title: 'Error',
-          description: 'Failed to generate level. Please try again.',
-          variant: 'destructive',
-        });
-        return;
+      if (!imageURL) {
+          toast({
+              title: 'Error',
+              description: 'Please upload an image first.',
+              variant: 'destructive',
+          });
+          return;
       }
 
-      const { levelLayout } = result;
+      setLoading(true);
+      try {
+          const values = form.getValues();
+          let finalLevelDescription = values.levelDescription;
 
+          if (autoSuggest) {
+              // Generate level description using AI
+              const aiDescriptionResult = await generateLevelDescription({
+                  imageURL: imageURL,
+                  levelDescription: values.levelDescription,
+                  suggestionLevel: suggestionLevel, // Pass the suggestion level to the AI flow
+              });
 
-      const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
-      router.push(url);
+              if (aiDescriptionResult && aiDescriptionResult.description) {
+                  finalLevelDescription = aiDescriptionResult.description;
+              } else {
+                  toast({
+                      title: 'Suggestion Error',
+                      description: 'Failed to generate level description suggestions.',
+                      variant: 'destructive',
+                  });
+              }
+          }
 
-      toast({
-        title: 'Level Layout Generated!',
-        description: 'Customize your level file on the next page.',
-      });
-    } catch (error: any) {
-      console.error('Error generating level:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to generate level.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+          const result = await generateLevelFromImage({
+              imageURL,
+              levelDescription: finalLevelDescription,
+              codeLanguage,
+          });
+
+          if (!result || !result.levelLayout) {
+              toast({
+                  title: 'Error',
+                  description: 'Failed to generate level. Please try again.',
+                  variant: 'destructive',
+              });
+              return;
+          }
+
+          const { levelLayout } = result;
+
+          const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
+          router.push(url);
+
+          toast({
+              title: 'Level Layout Generated!',
+              description: 'Customize your level file on the next page.',
+          });
+      } catch (error: any) {
+          console.error('Error generating level:', error);
+          toast({
+              title: 'Error',
+              description: error.message || 'Failed to generate level.',
+              variant: 'destructive',
+          });
+      } finally {
+          setLoading(false);
+      }
   };
 
 
@@ -169,6 +194,36 @@ export default function Home() {
              </div>
             )}
 
+             <div className="flex items-center space-x-2">
+                        <Label htmlFor="auto-suggest">Enable Auto-Suggestions:</Label>
+                        <Input
+                            type="checkbox"
+                            id="auto-suggest"
+                            checked={autoSuggest}
+                            onChange={(e) => setAutoSuggest(e.target.checked)}
+                            className="ml-2"
+                        />
+                    </div>
+
+                    {autoSuggest && (
+                        <>
+                            <Label htmlFor="suggestion-level">Suggestion Level:</Label>
+                            <Slider
+                                id="suggestion-level"
+                                defaultValue={[suggestionLevel]}
+                                max={100}
+                                step={1}
+                                aria-label="Suggestion Level"
+                                onValueChange={(value) => setSuggestionLevel(value[0])}
+                                className="w-full"
+                            />
+                            <p className="text-sm text-muted-foreground">
+                                Adjust the level of AI-generated suggestions (0-100).
+                            </p>
+                        </>
+                    )}
+
+
             <Label htmlFor="level-description">
               Level Description (optional):
             </Label>
@@ -202,3 +257,4 @@ export default function Home() {
     </div>
   );
 }
+
