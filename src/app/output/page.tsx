@@ -5,9 +5,13 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
 import { saveAs } from 'file-saver';
+import { codeLanguageOptions } from '@/app/page'; // Import the options
+import { useRouter } from 'next/navigation';
+
 
 export default function OutputPage() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const levelLayout = searchParams.get('levelLayout') || '';
     const codeLanguage = searchParams.get('codeLanguage') || 'txt';
 
@@ -20,10 +24,15 @@ export default function OutputPage() {
         json: 'json',
     };
 
+
     const handleDownloadLevel = () => {
         if (levelLayout) {
             const blob = new Blob([levelLayout], { type: 'text/plain;charset=utf-8' });
             saveAs(blob, `level.${codeLanguageExtensions[codeLanguage] || 'txt'}`);
+            toast({
+                title: 'Level Download Started',
+                description: 'Your level is now being downloaded.',
+            });
         }
     };
 
@@ -35,7 +44,7 @@ export default function OutputPage() {
                     <pre className="mb-4 p-4 rounded-md bg-gray-100 dark:bg-gray-800 overflow-auto">
                         <code>{levelLayout}</code>
                     </pre>
-                    <Button onClick={handleDownloadLevel}>
+                    <Button onClick={handleDownloadLevel} >
                         Download Level Code
                     </Button>
                 </>

@@ -1,15 +1,21 @@
 'use client';
 
-import {useState, useCallback, useEffect} from 'react';
-import {useRouter} from 'next/navigation';
-import {useForm} from 'react-hook-form';
-import {z} from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import {Button} from '@/components/ui/button';
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -17,10 +23,12 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import {useToast} from '@/hooks/use-toast';
-import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import {Icons} from '@/components/icons';
-import {useDropzone} from 'react-dropzone';
+import { useToast } from '@/hooks/use-toast';
+import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
+import { Icons } from '@/components/icons';
+import { useDropzone } from 'react-dropzone';
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -29,20 +37,21 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  {label: 'Python', value: 'python'},
-  {label: 'Lua', value: 'lua'},
-  {label: 'GDScript', value: 'gdscript'},
-  {label: 'C#', value: 'csharp'},
-  {label: 'C++', value: 'cpp'},
-  {label: 'JSON', value: 'json'},
+  { label: 'Python', value: 'python' },
+  { label: 'Lua', value: 'lua' },
+  { label: 'GDScript', value: 'gdscript' },
+  { label: 'C#', value: 'csharp' },
+  { label: 'C++', value: 'cpp' },
 ];
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
+  const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
+  const [generatedDescription, setGeneratedDescription] = useState<string>('');
 
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -63,7 +72,7 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -97,7 +106,7 @@ export default function Home() {
         return;
       }
 
-      const {levelLayout} = result;
+      const { levelLayout } = result;
 
       const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
       router.push(url);
@@ -111,6 +120,52 @@ export default function Home() {
       toast({
         title: 'Error',
         description: error.message || 'Failed to generate level.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!imageURL) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await generateLevelDescription({
+        imageURL,
+        levelDescription: form.getValues().levelDescription,
+        suggestionLevel: 75, // You can adjust the suggestion level as needed
+      });
+
+      if (!result || !result.description) {
+        toast({
+          title: 'Error',
+          description: 'Failed to generate description. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setGeneratedDescription(result.description);
+      form.setValue('levelDescription', result.description);
+
+      toast({
+        title: 'Level Description Generated!',
+        description: 'The level description has been automatically generated.',
+      });
+    } catch (error: any) {
+      console.error('Error generating description:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to generate description.',
         variant: 'destructive',
       });
     } finally {
@@ -161,6 +216,17 @@ export default function Home() {
               placeholder="Describe any specific requirements or ideas for the level"
               {...form.register('levelDescription')}
             />
+
+            <Button onClick={handleGenerateDescription} disabled={loading}>
+              {loading ? (
+                <>
+                  Generating Description
+                  <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                'Generate Description'
+              )}
+            </Button>
 
             <Label htmlFor="code-language">Code Language:</Label>
             <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
