@@ -1,11 +1,11 @@
 'use client';
 
-import {useState, useCallback} from 'react';
-import {useRouter} from 'next/navigation';
-import {useForm} from 'react-hook-form';
-import {z} from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod';
-import {Button} from '@/components/ui/button';
+import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -13,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -22,11 +22,13 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import {useToast} from '@/hooks/use-toast';
-import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import {Icons} from '@/components/icons';
-import {useDropzone} from 'react-dropzone';
+import { useToast } from '@/hooks/use-toast';
+import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
+import { Icons } from '@/components/icons';
+import { useDropzone } from 'react-dropzone';
 import Link from 'next/link';
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+import { Switch } from "@/components/ui/switch"
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -35,19 +37,20 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  {label: 'Python', value: 'python'},
-  {label: 'Lua', value: 'lua'},
-  {label: 'GDScript', value: 'gdscript'},
-  {label: 'C#', value: 'csharp'},
-  {label: 'C++', value: 'cpp'},
+  { label: 'Python', value: 'python' },
+  { label: 'Lua', value: 'lua' },
+  { label: 'GDScript', value: 'gdscript' },
+  { label: 'C#', value: 'csharp' },
+  { label: 'C++', value: 'cpp' },
 ];
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
+  const [autoSuggest, setAutoSuggest] = useState(false);
 
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -57,20 +60,18 @@ export default function Home() {
     },
   });
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        const file = acceptedFiles[0];
-        if (!file) return;
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImageURL(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-    }, []);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImageURL(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
-
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
-
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -126,6 +127,7 @@ export default function Home() {
     }
   };
 
+
   const handleGenerateDescription = async () => {
     if (!imageURL) {
       toast({
@@ -171,6 +173,7 @@ export default function Home() {
     }
   };
 
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
@@ -198,21 +201,24 @@ export default function Home() {
                 </Button>
               </div>
             ) : (
-              
-                  
-                      <Label htmlFor="image-upload" className="cursor-pointer">
-                        Select Image <Icons.upload className="ml-2 h-4 w-4" />
-                      </Label>
-                  
-              
+              <div
+                {...getRootProps()}
+                className="border-2 border-dashed rounded-md p-4 dark:border-cyan-400 text-center cursor-pointer"
+              >
+                <input
+                  {...getInputProps()}
+                  type="file"
+                  id="image-upload"
+                  className="hidden"
+                  accept="image/*"
+                />
+                {isDragActive ? (
+                  <p>Drop the image here...</p>
+                ) : (
+                  <p>Upload image here</p>
+                )}
+              </div>
             )}
-            <input
-              type="file"
-              id="image-upload"
-              className="hidden"
-              accept="image/*"
-              {...getInputProps()}
-            />
 
             <Label htmlFor="level-description">
               Level Description (optional):
@@ -234,6 +240,12 @@ export default function Home() {
                 'Generate Description'
               )}
             </Button>
+
+            <Label className="space-x-2">
+              <span>Auto-Suggestions:</span>
+              <Switch id="auto-suggestions"
+                onCheckedChange={(checked) => setAutoSuggest(checked)} />
+            </Label>
 
             <Label htmlFor="code-language">Code Language:</Label>
             <Select
