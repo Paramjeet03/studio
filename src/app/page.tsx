@@ -29,7 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
 import { Icons } from '@/components/icons';
 import { Slider } from "@/components/ui/slider"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -172,7 +172,7 @@ export default function Home() {
 
              <div className="flex items-center space-x-2">
                         <Label htmlFor="auto-suggest">Enable Auto-Suggestions:</Label>
-                        <Checkbox
+                        <Switch
                             id="auto-suggest"
                             checked={autoSuggest}
                             onCheckedChange={(e) => setAutoSuggest(e)}
@@ -214,4 +214,3 @@ export default function Home() {
     </div>
   );
 }
-
