@@ -4,7 +4,6 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
-import { saveAs } from 'file-saver';
 import { codeLanguageOptions } from '@/lib/utils'; // Import the options
 import { useRouter } from 'next/navigation';
 
@@ -29,7 +28,14 @@ export default function OutputPage() {
     const handleDownloadLevel = () => {
         if (levelLayout) {
             const blob = new Blob([levelLayout], { type: 'text/plain;charset=utf-8' });
-            saveAs(blob, `level.${codeLanguageExtensions[codeLanguage] || 'txt'}`);
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `level.${codeLanguageExtensions[codeLanguage] || 'txt'}`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
             toast({
                 title: 'Level Download Started',
                 description: 'Your level is now being downloaded.',
