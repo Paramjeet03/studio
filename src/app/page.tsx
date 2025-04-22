@@ -40,6 +40,7 @@ const codeLanguageOptions = [
   { label: 'Lua', value: 'lua' },
   { label: 'GDScript', value: 'gdscript' },
   { label: 'C#', value: 'csharp' },
+  { label: 'C++', value: 'cpp' },
   { label: 'JSON', value: 'json' },
 ];
 
@@ -201,4 +202,3 @@ export default function Home() {
     </div>
   );
 }
-
