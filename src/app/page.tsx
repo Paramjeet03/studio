@@ -26,9 +26,9 @@ import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {Icons} from '@/components/icons';
 import {useDropzone} from 'react-dropzone';
-import Link from 'next/link';
-import {generateLevelDescription} from '@/ai/flows/generate-level-description';
-import {Switch} from "@/components/ui/switch"
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
+import {codeLanguageOptions} from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -36,19 +36,11 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>;
 
-const codeLanguageOptions = [
-  {label: 'Python', value: 'python'},
-  {label: 'Lua', value: 'lua'},
-  {label: 'GDScript', value: 'gdscript'},
-  {label: 'C#', value: 'csharp'},
-  {label: 'C++', value: 'cpp'},
-];
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
-
   const {toast} = useToast();
   const router = useRouter();
 
@@ -105,11 +97,11 @@ export default function Home() {
       }
 
       const levelLayout = result.levelLayout;
-      const url = `/output?levelLayout=${encodeURIComponent(
-        levelLayout
-      )}&codeLanguage=${codeLanguage}`;
-      router.push(url);
-
+      router.push(
+        `/output?levelLayout=${encodeURIComponent(
+          levelLayout
+        )}&codeLanguage=${codeLanguage}`
+      );
       toast({
         title: 'Level Layout Generated!',
         description: 'Customize your level file on the next page.',
@@ -125,7 +117,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-
 
   const handleGenerateDescription = async () => {
     if (!imageURL) {
@@ -172,10 +163,9 @@ export default function Home() {
     }
   };
 
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
-      <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+          <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400">
@@ -229,7 +219,7 @@ export default function Home() {
               className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400"
             />
 
-            <Button onClick={handleGenerateDescription} disabled={loading}>
+             <Button onClick={handleGenerateDescription} disabled={loading}>
               {loading ? (
                 <>
                   Generating Description
@@ -273,3 +263,4 @@ export default function Home() {
     </div>
   );
 }
+
