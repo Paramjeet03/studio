@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import {useState, useCallback, useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {Button} from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -13,8 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {Label} from '@/components/ui/label';
+import {Textarea} from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -22,13 +22,13 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
-import { Icons } from '@/components/icons';
-import { useDropzone } from 'react-dropzone';
+import {useToast} from '@/hooks/use-toast';
+import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
+import {Icons} from '@/components/icons';
+import {useDropzone} from 'react-dropzone';
 import Link from 'next/link';
-import { generateLevelDescription } from '@/ai/flows/generate-level-description';
-import { Switch } from "@/components/ui/switch"
+import {generateLevelDescription} from '@/ai/flows/generate-level-description';
+import {Switch} from "@/components/ui/switch"
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -37,20 +37,19 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  { label: 'Python', value: 'python' },
-  { label: 'Lua', value: 'lua' },
-  { label: 'GDScript', value: 'gdscript' },
-  { label: 'C#', value: 'csharp' },
-  { label: 'C++', value: 'cpp' },
+  {label: 'Python', value: 'python'},
+  {label: 'Lua', value: 'lua'},
+  {label: 'GDScript', value: 'gdscript'},
+  {label: 'C#', value: 'csharp'},
+  {label: 'C++', value: 'cpp'},
 ];
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
-  const [autoSuggest, setAutoSuggest] = useState(false);
 
-  const { toast } = useToast();
+  const {toast} = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -71,7 +70,7 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -240,12 +239,6 @@ export default function Home() {
                 'Generate Description'
               )}
             </Button>
-
-            <Label className="space-x-2">
-              <span>Auto-Suggestions:</span>
-              <Switch id="auto-suggestions"
-                onCheckedChange={(checked) => setAutoSuggest(checked)} />
-            </Label>
 
             <Label htmlFor="code-language">Code Language:</Label>
             <Select
