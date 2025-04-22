@@ -30,6 +30,7 @@ import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
 import { Icons } from '@/components/icons';
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
+import { generateLevelDescription } from "@/ai/flows/generate-level-description";
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -52,6 +53,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
     const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
+    const [suggestionLevel, setSuggestionLevel] = useState<number>(50); // Default to 50
 
 
   const { toast } = useToast();
@@ -63,6 +65,47 @@ export default function Home() {
       levelDescription: '',
     },
   });
+
+    const onGenerateDescription = async () => {
+        if (!imageURL) {
+            toast({
+                title: 'Error',
+                description: 'Please upload an image first.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const result = await generateLevelDescription({
+                imageURL,
+                levelDescription: form.getValues().levelDescription,
+                suggestionLevel: suggestionLevel,
+            });
+
+            if (result && result.description) {
+                form.setValue('levelDescription', result.description);
+            } else {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to generate level description. Please try again.',
+                    variant: 'destructive',
+                });
+            }
+        } catch (error: any) {
+            console.error('Error generating level description:', error);
+            toast({
+                title: 'Error',
+                description: error.message || 'Failed to generate level description.',
+                variant: 'destructive',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -170,25 +213,33 @@ export default function Home() {
              </div>
             )}
 
-             <div className="flex items-center space-x-2">
-                        <Label htmlFor="auto-suggest">Enable Auto-Suggestions:</Label>
-                        <Switch
-                            id="auto-suggest"
-                            checked={autoSuggest}
-                            onCheckedChange={(e) => setAutoSuggest(e)}
-                            className="ml-2"
-                        />
-                    </div>
+
 
 
             <Label htmlFor="level-description">
               Level Description (optional):
             </Label>
-            <Textarea
-              id="level-description"
-              placeholder="Describe any specific requirements or ideas for the level"
-              {...form.register('levelDescription')}
-            />
+            <div className="flex space-x-2">
+                            <Textarea
+                                id="level-description"
+                                placeholder="Describe any specific requirements or ideas for the level"
+                                {...form.register('levelDescription')}
+                                className="flex-grow"
+                            />
+                            <Button
+                                type="button"
+                                onClick={onGenerateDescription}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>Generate Description</>
+                                )}
+                            </Button>
+                        </div>
 
             <Label htmlFor="code-language">
               Code Language:

@@ -50,6 +50,11 @@ Image URL: {{imageURL}}
 User Description: {{levelDescription}}
 Suggestion Level: {{suggestionLevel}}
 
+Here are some considerations for elements to include in your level description:
+*   **Environment and Setting:** Describe the environment. Is it a forest, a desert, a futuristic city, or something else? What are the dominant colors and textures? What makes this setting unique?
+*   **Gameplay Opportunities:** What unique gameplay opportunities does the setting afford? Does it encourage exploration, puzzle-solving, combat, or a combination of these?
+*   **Unique Elements:** Describe any unique architectural or natural elements, such as ancient ruins, waterfalls, hidden caves, or futuristic skyscrapers.
+
 Respond with a detailed level description.
 `,
 });
