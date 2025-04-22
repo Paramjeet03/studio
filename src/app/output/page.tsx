@@ -1,183 +1,67 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { useState, useEffect } from 'react';
-import JSZip from 'jszip';
-import { useToast } from '@/hooks/use-toast';
-import { Form, FormField, FormItem, FormLabel, FormMessage, FormControl } from '@/components/ui/form';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useRouter } from 'next/navigation';
+import {useSearchParams} from 'next/navigation';
+import {useEffect, useState} from 'react';
+import {useToast} from '@/hooks/use-toast';
+import {Button} from "@/components/ui/button";
 
-const formSchema = z.object({
-    theme: z.string().optional(),
-    background: z.string().optional(),
-});
+const codeLanguageExtensions: { [key: string]: string } = {
+    python: 'py',
+    lua: 'lua',
+    gdscript: 'gd',
+    csharp: 'cs',
+    json: 'json',
+};
 
 export default function OutputPage() {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const levelLayout = searchParams.get('levelLayout') || '';
-    const themeSuggestionsString = searchParams.get('themeSuggestions') || '[]';
-    const themeSuggestions = JSON.parse(themeSuggestionsString) as string[];
-    const spriteSuggestionsString = searchParams.get('spriteSuggestions') ?? '[]';
-    const spriteSuggestions = JSON.parse(spriteSuggestionsString || '[]') as string[];
-    const backgroundImageURL = searchParams.get('backgroundImageURL') || '';
-    const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
-    const [selectedBackground, setSelectedBackground] = useState<string | null>(null);
-    const { toast } = useToast();
-     const [generatedLevelURL, setGeneratedLevelURL] = useState<string | null>(null);
-     const [loading, setLoading] = useState(false);
+    const codeLanguage = searchParams.get('codeLanguage') || 'txt'; // Default to txt if not provided
+    const [downloadURL, setDownloadURL] = useState<string | null>(null);
 
-     const [spriteImageURL, setSpriteImageURL] = useState<string | null>(null);
+    useEffect(() => {
+        if (levelLayout) {
+            const blob = new Blob([levelLayout], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            setDownloadURL(url);
+        } else {
+            setDownloadURL(null);
+        }
+        // Cleanup when component unmounts or levelLayout changes
+        return () => {
+            if (downloadURL) {
+                URL.revokeObjectURL(downloadURL);
+            }
+        };
+    }, [levelLayout, codeLanguage]);
 
-     // Define your form.
-     const form = useForm<z.infer<typeof formSchema>>({
-         resolver: zodResolver(formSchema),
-         defaultValues: {
-             theme: themeSuggestions[0] || '', // Default to the first theme suggestion if available
-        background: backgroundImageURL,
-         },
-     });
+    const getFilename = () => {
+        const extension = codeLanguageExtensions[codeLanguage] || 'txt';
+        return `level.${extension}`;
+    };
 
-     useEffect(() => {
-      // Set the selected theme based on the form value
-      setSelectedTheme(form.watch('theme') || null);
-      setSelectedBackground(form.watch('background') || null);
-    }, [form.watch('theme'), form.watch('background')]);
+    return (
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <h1 className="text-3xl font-bold mb-4">Generated Level Code</h1>
 
-     function onSubmit(values: z.infer<typeof formSchema>) {
-         toast({
-
-             title: 'You submitted the following values:',
-             description: JSON.stringify(values, null, 2),
-         });
-     }
-
-     const handleDownloadLevel = async () => {
-         setLoading(true);
-
-         try {
-              const files = [
-                  { name: 'level.json', content: levelLayout },
-                  { name: 'theme.txt', content: selectedTheme || 'default' },
-                  { name: 'background.txt', content: selectedBackground || 'default_background' },
-                  { name: 'sprites.txt', content: spriteSuggestions.join('\n') || 'no_sprites' }, // List of sprites
-              ];
-
-              // Create a zip file containing the level files
-              const zipFileName = 'level_pack.zip';
-              const zip = new JSZip();
-              files.forEach(file => {
-                  zip.file(file.name, file.content);
-              });
-
-              // Generate the zip file as a blob
-              const blob = await zip.generateAsync({ type: "blob" });
-
-              // Create a download link for the zip file
-              const url = URL.createObjectURL(blob);
-              setGeneratedLevelURL(url);
-
-              // Programmatically trigger the download
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = zipFileName;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-
-              URL.revokeObjectURL(url);
-
-              toast({
-                  title: 'Level Download Started',
-                  description: 'Your level is now being downloaded as a zip file.',
-              });
-         } catch (error: any) {
-              console.error('Error generating or downloading level:', error);
-              toast({
-                  title: 'Download Error',
-                  description: error.message || 'Failed to generate the level file.',
-                  variant: 'destructive',
-              });
-         } finally {
-              setLoading(false);
-         }
-     };
-
-
-  return (
-         <div className="flex flex-col items-center justify-center min-h-screen p-4">
-              <h1 className="text-3xl font-bold mb-4">Level Export</h1>
-              <Card className="w-full max-w-4xl">
-                   <CardHeader>
-                        <CardTitle>Customize and Download Your Level</CardTitle>
-                        <CardDescription>
-                             Review the generated level and select your preferred theme before downloading.
-                        </CardDescription>
-                   </CardHeader>
-                   <CardContent className="grid gap-4">
-
-                        <div className="border p-4 rounded-md">
-                             <h3 className="text-xl font-semibold mb-2">Theme Selection</h3>
-                             <p>Choose a theme to customize your level:</p>
-                                 <Form {...form}>
-                                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                                         <FormField
-                                             control={form.control}
-                                             name="theme"
-                                             render={({ field }) => (
-                                                 <FormItem className="space-y-3">
-                                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex flex-col space-y-1">
-                                                         {themeSuggestions.map((theme) => (
-                                                             <FormItem key={theme} className="flex items-center space-x-3 space-y-0">
-                                                                 <FormControl>
-                                                                     <RadioGroupItem value={theme} id={theme} className="bg-primary text-primary-foreground" />
-                                                                 </FormControl>
-                                                                 <FormLabel htmlFor={theme}>{theme}</FormLabel>
-                                                             </FormItem>
-                                                         ))}
-                                                     </RadioGroup>
-                                                     <FormMessage />
-                                                 </FormItem>
-                                             )}
-                                         />
-                                     </form>
-                                 </Form>
-+
-+                               {spriteSuggestions && spriteSuggestions.length > 0 && (
-+                                    <div className="mt-4">
-+                                        <h4 className="text-lg font-semibold mb-2">Available Sprites</h4>
-+                                        <div className="flex flex-wrap gap-2">
-+                                            {spriteSuggestions.map((sprite, index) => (
-+                                                <div key={index} className="border rounded-md p-2">
-+                                                    <Label>{sprite}</Label>
-+                                                    {/* Replace with actual sprite image display if possible */}
-+                                                    {/* For now, just show the sprite name */}
-+                                                </div>
-+                                            ))}
-+                                        </div>
-+                                    </div>
-+                                )}
-                                  <Button onClick={handleDownloadLevel} disabled={!levelLayout || loading}>
-                                      {loading ? 'Downloading...' : 'Download Level'}
-                                  </Button>
-
-                         </div>
-+
-+
-+
-+
- 
-                     </CardContent>
-                </Card>
-          </div>
-+
+            {levelLayout ? (
+                <>
+                    <pre className="mb-4 p-4 rounded-md bg-gray-100 dark:bg-gray-800 overflow-auto">
+                        <code>{levelLayout}</code>
+                    </pre>
+                    {downloadURL && (
+                        <a
+                            href={downloadURL}
+                            download={getFilename()}
+                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Download Level Code
+                        </a>
+                    )}
+                </>
+            ) : (
+                <p>No level code generated. Please return to the homepage to generate a level.</p>
+            )}
+        </div>
     );
 }

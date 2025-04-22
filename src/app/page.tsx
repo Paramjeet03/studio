@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
+import {useState} from 'react';
+import {useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -15,8 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {Label} from '@/components/ui/label';
+import {Textarea} from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -24,31 +24,35 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
+import {useToast} from '@/hooks/use-toast';
+import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
+import {Icons} from '@/components/icons';
 
 const formSchema = z.object({
-  theme: z.string().optional(),
   levelDescription: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
 
+const codeLanguageOptions = [
+  {label: 'Python', value: 'python'},
+  {label: 'Lua', value: 'lua'},
+  {label: 'GDScript', value: 'gdscript'},
+  {label: 'C#', value: 'csharp'},
+  {label: 'JSON', value: 'json'},
+];
+
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
-  const [gameFolder, setGameFolder] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [codeLanguage, setCodeLanguage] = useState<string>('JSON');
-  const [aiGeneratedDescription, setAiGeneratedDescription] = useState<string>('');
+  const [codeLanguage, setCodeLanguage] = useState<string>('python');
 
-
-  const { toast } = useToast();
+  const {toast} = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      theme: '',
       levelDescription: '',
     },
   });
@@ -62,6 +66,10 @@ export default function Home() {
       setImageURL(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImageURL('');
   };
 
   const handleGenerateLevel = async () => {
@@ -80,35 +88,28 @@ export default function Home() {
 
       const result = await generateLevelFromImage({
         imageURL,
-        gameFolder,
         levelDescription: values.levelDescription,
+        codeLanguage,
       });
 
-      const {
-        levelLayout = '',
-        themeSuggestions = [],
-        spriteSuggestions = [],
-        backgroundImageURL = '',
-        levelDescription: generatedLevelDescription = '',
-      } = result || {};
+      if (!result) {
+            toast({
+                title: 'Error',
+                description: 'Failed to generate level. Please try again.',
+                variant: 'destructive',
+            });
+            return;
+        }
 
-      setAiGeneratedDescription(generatedLevelDescription);
+      const {levelLayout = ''} = result || {};
 
-      const levelData = {
-        levelLayout,
-        themeSuggestions,
-        spriteSuggestions,
-        backgroundImageURL,
-        codeLanguage,
-      };
-
-      localStorage.setItem('generatedLevelData', JSON.stringify(levelData));
-      router.push('/output');
-
+      const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
+       router.push(url);
       toast({
         title: 'Level Layout Generated!',
-        description: 'Choose a theme and download your level file on the next page.',
+        description: 'Customize your level file on the next page.',
       });
+
     } catch (error: any) {
       console.error('Error generating level:', error);
       toast({
@@ -121,8 +122,6 @@ export default function Home() {
     }
   };
 
-  const onSubmit = form.handleSubmit(handleGenerateLevel);
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
@@ -130,80 +129,73 @@ export default function Home() {
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Image Upload</CardTitle>
+            <CardTitle>Level Generator</CardTitle>
             <CardDescription>
-              Upload an image to generate a game level layout.
+              Generate a game level layout based on your requirements.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="flex flex-col space-y-4">
-            <Label htmlFor="image-upload">Upload Image:</Label>
-            <Input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              style={{ display: 'none' }} // Hide the input
-            />
+            <Label htmlFor="image-upload">
+              Upload Image:
+            </Label>
 
             {imageURL ? (
-              <img
-                src={imageURL}
-                alt="Uploaded"
-                className="max-h-64 object-contain rounded-md"
-              />
+              <>
+                <img
+                  src={imageURL}
+                  alt="Uploaded"
+                  className="max-h-64 object-contain rounded-md"
+                />
+                <Button variant="secondary" onClick={handleRemoveImage}>
+                  Remove Image
+                </Button>
+              </>
             ) : (
-              <div
-                className="max-h-64 flex items-center justify-center rounded-md border-2 border-dashed border-gray-400 bg-gray-100 h-64 cursor-pointer"
-                onClick={() => document.getElementById('image-upload')?.click()} // Trigger input click
-              >
-                <span className="text-gray-500">Upload an image or sketch here</span>
-              </div>
+              <>
+                <Input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Label htmlFor="image-upload" className="cursor-pointer">
+                 <Button asChild>
+                     <div className="flex items-center">
+                        Select Image <Icons.upload className="ml-2 h-4 w-4" />
+                     </div>
+                  </Button>
+                </Label>
+              </>
             )}
 
-          {aiGeneratedDescription && (
-                <div className="mt-4">
-                    <Label>Generated Level Description:</Label>
-                    <p className="text-sm text-muted-foreground">{aiGeneratedDescription}</p>
-                </div>
-            )}
-
-
-            <Label htmlFor="level-description">Level Description (optional):</Label>
+            <Label htmlFor="level-description">
+              Level Description (optional):
+            </Label>
             <Textarea
               id="level-description"
               placeholder="Describe any specific requirements or ideas for the level"
               {...form.register('levelDescription')}
             />
 
-            <Label htmlFor="game-folder">Game Folder (optional):</Label>
-            <Input
-              id="game-folder"
-              type="text"
-              placeholder="Path to game folder"
-              value={gameFolder}
-              onChange={(e) => setGameFolder(e.target.value)}
-            />
-
-            <div className="text-sm text-muted-foreground">
-              Providing your game folder path allows the AI to tailor the level creation based on your game’s codebase and engine.
-            </div>
-
-            <Label htmlFor="code-language">Code Language:</Label>
+            <Label htmlFor="code-language">
+              Code Language:
+            </Label>
             <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
               <SelectContent>
-                {['JSON', 'Lua', 'GDScript', 'C#', 'Python', 'C++'].map((lang) => (
-                  <SelectItem key={lang} value={lang}>
-                    {lang}
+                {codeLanguageOptions.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Button onClick={onSubmit} disabled={loading}>
+            <Button onClick={handleGenerateLevel} disabled={loading}>
               {loading ? 'Generating...' : 'Generate Level Layout'}
             </Button>
           </CardContent>
@@ -212,3 +204,4 @@ export default function Home() {
     </div>
   );
 }
+
