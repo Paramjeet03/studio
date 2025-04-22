@@ -57,18 +57,20 @@ export default function Home() {
     },
   });
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        const file = acceptedFiles[0];
+        if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImageURL(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  }, []);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImageURL(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    }, []);
 
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
+
+    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
+
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -170,11 +172,11 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
       <div className="flex w-full max-w-4xl space-x-4">
-        <Card className="w-full dark:bg-black dark:text-slate-200 dark:border-cyan-400">
+        <Card className="w-full dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400">
           <CardHeader>
             <CardTitle>Level Generator</CardTitle>
             <CardDescription>
@@ -196,20 +198,21 @@ export default function Home() {
                 </Button>
               </div>
             ) : (
-              <div
-                {...getRootProps()}
-                className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer dark:bg-gray-800 dark:border-gray-600"
-              >
-                <input {...getInputProps()} />
-                {isDragActive ? (
-                  <p className="dark:text-slate-200">Drop the files here ...</p>
-                ) : (
-                  <p className="dark:text-slate-200">
-                    Drag 'n' drop some files here, or click to select files
-                  </p>
-                )}
-              </div>
+              
+                  
+                      <Label htmlFor="image-upload" className="cursor-pointer">
+                        Select Image <Icons.upload className="ml-2 h-4 w-4" />
+                      </Label>
+                  
+              
             )}
+            <input
+              type="file"
+              id="image-upload"
+              className="hidden"
+              accept="image/*"
+              {...getInputProps()}
+            />
 
             <Label htmlFor="level-description">
               Level Description (optional):
@@ -218,7 +221,7 @@ export default function Home() {
               id="level-description"
               placeholder="Describe any specific requirements or ideas for the level"
               {...form.register('levelDescription')}
-              className="dark:bg-black dark:text-slate-200 dark:border-cyan-400"
+              className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400"
             />
 
             <Button onClick={handleGenerateDescription} disabled={loading}>
@@ -237,10 +240,10 @@ export default function Home() {
               onValueChange={setCodeLanguage}
               defaultValue={codeLanguage}
             >
-              <SelectTrigger className="w-[180px] dark:bg-black dark:text-slate-200 dark:border-cyan-400">
+              <SelectTrigger className="w-[180px] dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400">
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
-              <SelectContent className="dark:bg-black dark:text-slate-200 dark:border-cyan-400">
+              <SelectContent className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400">
                 {codeLanguageOptions.map((lang) => (
                   <SelectItem key={lang.value} value={lang.value}>
                     {lang.label}
