@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
 import { saveAs } from 'file-saver';
-import { codeLanguageOptions } from '@/app/page'; // Import the options
+import { codeLanguageOptions } from '@/lib/utils'; // Import the options
 import { useRouter } from 'next/navigation';
 
 

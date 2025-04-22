@@ -29,7 +29,7 @@ import { Icons } from '@/components/icons';
 import { useDropzone } from 'react-dropzone';
 import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 import Link from 'next/link';
-import { useAuth } from '@/components/auth-provider';
+// import { useAuth } from '@/components/auth-provider';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -52,7 +52,7 @@ export default function Home() {
 
   const { toast } = useToast();
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  // const { user, loading: authLoading } = useAuth();
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -176,7 +176,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
-      {authLoading ? (
+      {/* {authLoading ? (
         <p>Checking authentication...</p>
       ) : user ? (
         <>
@@ -187,7 +187,7 @@ export default function Home() {
         </>
       ) : (
         null
-      )}
+      )} */}
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full">
