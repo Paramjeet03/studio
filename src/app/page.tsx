@@ -5,7 +5,6 @@ import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {useDropzone} from 'react-dropzone';
 
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -28,10 +27,8 @@ import {
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {Icons} from '@/components/icons';
-import {Slider} from "@/components/ui/slider"
-import {Switch} from "@/components/ui/switch"
+import {useDropzone} from 'react-dropzone';
 import { generateLevelDescription } from "@/ai/flows/generate-level-description";
-
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -52,8 +49,9 @@ const codeLanguageOptions = [
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [descriptionLoading, setDescriptionLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
-  const [autoSuggest, setAutoSuggest] = useState<boolean>(false);
+  const [suggestionLevel, setSuggestionLevel] = useState<number>(50);
 
 
   const {toast} = useToast();
@@ -78,6 +76,7 @@ export default function Home() {
   }, []);
 
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
+
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -132,6 +131,51 @@ export default function Home() {
     }
   };
 
+  const handleGenerateDescription = async () => {
+    if (!imageURL) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setDescriptionLoading(true);
+    try {
+      const result = await generateLevelDescription({
+        imageURL: imageURL,
+        levelDescription: form.getValues().levelDescription,
+        suggestionLevel: suggestionLevel,
+      });
+
+      if (!result || !result.description) {
+        toast({
+          title: 'Error',
+          description: 'Failed to generate level description. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      form.setValue('levelDescription', result.description);
+
+      toast({
+        title: 'Level Description Generated!',
+        description: 'The level description has been automatically generated.',
+      });
+    } catch (error: any) {
+      console.error('Error generating level description:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to generate level description.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDescriptionLoading(false);
+    }
+  };
+
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -182,6 +226,21 @@ export default function Home() {
                 {...form.register('levelDescription')}
                 className="flex-grow"
               />
+               <Button
+                 onClick={handleGenerateDescription}
+                 disabled={descriptionLoading}
+                 variant="outline"
+                 className="sm:w-auto"
+               >
+                 {descriptionLoading ? (
+                   <>
+                     Generating...
+                     <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                   </>
+                 ) : (
+                   'Generate Description'
+                 )}
+               </Button>
 
             </div>
 
@@ -211,4 +270,3 @@ export default function Home() {
     </div>
   );
 }
-
