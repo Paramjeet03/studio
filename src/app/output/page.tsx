@@ -4,26 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from "@/components/ui/button";
-import { codeLanguageOptions } from '@/lib/utils'; // Import the options
 import { useRouter } from 'next/navigation';
-
 
 export default function OutputPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { toast } = useToast();
     const levelLayout = searchParams.get('levelLayout') || '';
-    const codeLanguage = searchParams.get('codeLanguage') || 'txt';
-
-    const codeLanguageExtensions: { [key: string]: string } = {
-        python: 'py',
-        lua: 'lua',
-        gdscript: 'gd',
-        csharp: 'cs',
-        cpp: 'cpp',
-        json: 'json',
-    };
-
 
     const handleDownloadLevel = () => {
         if (levelLayout) {
@@ -31,7 +18,7 @@ export default function OutputPage() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `level.${codeLanguageExtensions[codeLanguage] || 'txt'}`);
+            link.setAttribute('download', 'level.txt');
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -48,7 +35,7 @@ export default function OutputPage() {
             <h1 className="text-3xl font-bold mb-4">Generated Level Code</h1>
             {levelLayout ? (
                 <>
-                    <pre className="mb-4 p-4 rounded-md bg-gray-100 dark:bg-gray-800 overflow-auto">
+                    <pre className="mb-4 p-4 rounded-md bg-black text-white overflow-auto">
                         <code>{levelLayout}</code>
                     </pre>
                     <Button onClick={handleDownloadLevel} >
