@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useCallback} from 'react';
+import {useState, useCallback, useEffect} from 'react';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
@@ -41,8 +41,7 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
   const {toast} = useToast();
-  const [generatedDescription, setGeneratedDescription] = useState<string>('');
-
+  const [improvementSuggestions, setImprovementSuggestions] = useState<string>('');
   const router = useRouter();
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -58,6 +57,7 @@ export default function Home() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setImageURL(reader.result as string);
+      generateImprovementSuggestions(reader.result as string);
     };
     reader.readAsDataURL(file);
   }, []);
@@ -66,7 +66,7 @@ export default function Home() {
 
   const handleRemoveImage = () => {
     setImageURL('');
-    setGeneratedDescription(''); // Clear the description when the image is removed
+    form.setValue('levelDescription', '');
   };
 
   const handleGenerateLevel = async () => {
@@ -163,6 +163,45 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const generateImprovementSuggestions = async (image: string) => {
+     // Basic error handling and state management
+     setLoading(true);
+     try {
+       const result = await generateLevelDescription({
+         imageURL: image,
+         levelDescription: form.getValues().levelDescription,
+         suggestionLevel: 75,
+       });
+
+       if (result && result.description) {
+         setImprovementSuggestions(result.description); // Set suggestions here
+       } else {
+         toast({
+           title: 'Error',
+           description: 'Could not generate level improvements.',
+           variant: 'destructive',
+         });
+       }
+     } catch (error: any) {
+       console.error('Error generating level improvements:', error);
+       toast({
+         title: 'Error',
+         description: error.message || 'Failed to generate level improvements.',
+         variant: 'destructive',
+       });
+     } finally {
+       setLoading(false);
+     }
+   };
+
+  useEffect(() => {
+    if (imageURL) {
+      generateImprovementSuggestions(imageURL);
+    }
+  }, [imageURL]);
+
+  const [generatedDescription, setGeneratedDescription] = useState<string>('');
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
@@ -267,8 +306,19 @@ export default function Home() {
                         'Generate Level Layout'
                     )}
                 </Button>
+
+                {improvementSuggestions && (
+                  <div className="mt-4">
+                    <Label>Improvement Suggestions:</Label>
+                    <Alert>
+                      <AlertDescription>{improvementSuggestions}</AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+
             </CardContent>
         </Card>
     </div>
   );
 }
+
