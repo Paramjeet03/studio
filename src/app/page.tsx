@@ -28,7 +28,7 @@ import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
-import {Logo} from '@/components/logo';
+import Logo from "@/components/Logo";
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -170,7 +170,7 @@ export default function Home() {
             <Logo />
         </div>
 
-        <Card className="w-full max-w-4xl dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400">
+        <Card className="w-full max-w-4xl dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400 dark:focus-visible:ring-cyan-400">
             <CardHeader>
                 <CardTitle>Level Generator</CardTitle>
                 <CardDescription>
@@ -271,3 +271,4 @@ export default function Home() {
     </div>
   );
 }
+
