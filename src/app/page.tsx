@@ -18,8 +18,8 @@ import {
   Select,
   SelectTrigger,
   SelectValue,
-  SelectContent,
   SelectItem,
+  SelectContent,
 } from '@/components/ui/select';
 import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
@@ -28,6 +28,7 @@ import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -271,4 +272,3 @@ export default function Home() {
     </div>
   );
 }
-
