@@ -1,23 +1,15 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { motion } from 'framer-motion';
+import {useState, useCallback, useEffect} from 'react';
+import {useRouter} from 'next/navigation';
+import {useForm} from 'react-hook-form';
+import {z} from 'zod';
+import {zodResolver} from '@hookform/resolvers/zod';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
+import {Label} from '@/components/ui/label';
+import {Textarea} from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -25,11 +17,10 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
-import { Icons } from '@/components/icons';
-import { useDropzone } from 'react-dropzone';
-import { generateLevelDescription } from "@/ai/flows/generate-level-description";
+import {useToast} from '@/hooks/use-toast';
+import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
+import {Icons} from '@/components/icons';
+import {useDropzone} from 'react-dropzone';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -38,21 +29,20 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  { label: 'Python', value: 'python' },
-  { label: 'Lua', value: 'lua' },
-  { label: 'GDScript', value: 'gdscript' },
-  { label: 'C#', value: 'csharp' },
-  { label: 'C++', value: 'cpp' },
-  { label: 'JSON', value: 'json' },
+  {label: 'Python', value: 'python'},
+  {label: 'Lua', value: 'lua'},
+  {label: 'GDScript', value: 'gdscript'},
+  {label: 'C#', value: 'csharp'},
+  {label: 'C++', value: 'cpp'},
+  {label: 'JSON', value: 'json'},
 ];
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [descriptionLoading, setDescriptionLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
 
-  const { toast } = useToast();
+  const {toast} = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -73,7 +63,7 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -107,7 +97,7 @@ export default function Home() {
         return;
       }
 
-      const { levelLayout } = result;
+      const {levelLayout} = result;
 
       const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
       router.push(url);
@@ -128,65 +118,9 @@ export default function Home() {
     }
   };
 
-    const handleGenerateDescription = async () => {
-        if (!imageURL) {
-            toast({
-                title: 'Error',
-                description: 'Please upload an image first.',
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        setDescriptionLoading(true);
-        try {
-            const result = await generateLevelDescription({
-                imageURL: imageURL,
-                levelDescription: form.getValues().levelDescription,
-            });
-
-            if (!result || !result.description) {
-                toast({
-                    title: 'Error',
-                    description: 'Failed to generate level description. Please try again.',
-                    variant: 'destructive',
-                });
-                return;
-            }
-
-            form.setValue('levelDescription', result.description);
-
-            toast({
-                title: 'Level Description Generated!',
-                description: 'The level description has been automatically generated.',
-            });
-        } catch (error: any) {
-            console.error('Error generating level description:', error);
-            toast({
-                title: 'Error',
-                description: error.message || 'Failed to generate level description.',
-                variant: 'destructive',
-            });
-        } finally {
-            setDescriptionLoading(false);
-        }
-    };
-
   return (
-    <motion.div
-      className="flex flex-col items-center justify-center min-h-screen p-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.h1
-        className="text-3xl font-bold mb-4"
-        initial={{ y: -50 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        LevelUp AI
-      </motion.h1>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full">
@@ -198,15 +132,9 @@ export default function Home() {
           </CardHeader>
 
           <CardContent className="flex flex-col space-y-4">
-            <Label htmlFor="image-upload">
-              Upload Image:
-            </Label>
+            <Label htmlFor="image-upload">Upload Image:</Label>
             {imageURL ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div>
                 <img
                   src={imageURL}
                   alt="Uploaded"
@@ -215,7 +143,7 @@ export default function Home() {
                 <Button variant="secondary" onClick={handleRemoveImage} className="mt-2">
                   Remove Image
                 </Button>
-              </motion.div>
+              </div>
             ) : (
               <div {...getRootProps()} className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer">
                 <input {...getInputProps()} />
@@ -227,36 +155,14 @@ export default function Home() {
               </div>
             )}
 
-            <Label htmlFor="level-description">
-              Level Description (optional):
-            </Label>
-             <div className="flex flex-col sm:flex-row space-y-2 sm:space-x-2">
-               <Textarea
-                 id="level-description"
-                 placeholder="Describe any specific requirements or ideas for the level"
-                 {...form.register('levelDescription')}
-                 className="flex-grow"
-               />
-                <Button
-                  onClick={handleGenerateDescription}
-                  disabled={descriptionLoading}
-                  variant="outline"
-                  className="sm:w-auto"
-                >
-                  {descriptionLoading ? (
-                    <>
-                      Generating...
-                      <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-                    </>
-                  ) : (
-                    'Generate Description'
-                  )}
-                </Button>
+            <Label htmlFor="level-description">Level Description (optional):</Label>
+            <Textarea
+              id="level-description"
+              placeholder="Describe any specific requirements or ideas for the level"
+              {...form.register('levelDescription')}
+            />
 
-             </div>
-            <Label htmlFor="code-language">
-              Code Language:
-            </Label>
+            <Label htmlFor="code-language">Code Language:</Label>
             <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select a language" />
@@ -283,7 +189,6 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-    </motion.div>
+    </div>
   );
 }
-
