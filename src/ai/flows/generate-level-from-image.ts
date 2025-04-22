@@ -23,6 +23,7 @@ const GenerateLevelOutputSchema = z.object({
   themeSuggestions: z.array(z.string()).describe('Suggested themes derived from the image.'),
   spriteSuggestions: z.array(z.string()).optional().describe('Suggested sprites from the game folder, if available.'),
   backgroundImageURL: z.string().optional().describe('Suggested background image URL'),
+  levelDescription: z.string().optional().describe('AI Generated level description'),
 });
 export type GenerateLevelOutput = z.infer<typeof GenerateLevelOutputSchema>;
 
@@ -133,6 +134,26 @@ const listSpritesTool = ai.defineTool({
   }
 );
 
+const generateLevelDescriptionPrompt = ai.definePrompt({
+  name: 'generateLevelDescriptionPrompt',
+  input: {
+    schema: z.object({
+      imageURL: z.string().describe('The URL of the uploaded image.'),
+    }),
+  },
+  output: {
+    schema: z.object({
+      levelDescription: z.string().describe('A description of the generated game level.'),
+    }),
+  },
+  prompt: `You are an expert game level designer. Based on the visual elements of the following image, write a short and engaging description for a game level. Focus on the key features and atmosphere of the level.
+
+Image URL: {{imageURL}}
+
+Respond with a concise description of the game level.`,
+});
+
+
 const generateLevelFromImageFlow = ai.defineFlow<
   typeof GenerateLevelInputSchema,
   typeof GenerateLevelOutputSchema
@@ -161,6 +182,8 @@ const generateLevelFromImageFlow = ai.defineFlow<
     spriteSuggestions: spriteSuggestions ?? [],
   });
 
+  const { output: aiLevelDescription } = await generateLevelDescriptionPrompt({ imageURL });
+
   // Generate placeholder image URLs (replace with your logic)
   const backgroundImageURL = `https://picsum.photos/800/600?random=${Math.random()}`; // Example: Random background
 
@@ -169,5 +192,6 @@ const generateLevelFromImageFlow = ai.defineFlow<
     themeSuggestions: analyzeImageOutput!.themeSuggestions,
     spriteSuggestions: spriteSuggestions,
     backgroundImageURL: backgroundImageURL,
+    levelDescription: aiLevelDescription!.levelDescription,
   };
 });

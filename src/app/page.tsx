@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -40,6 +39,8 @@ export default function Home() {
   const [gameFolder, setGameFolder] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('JSON');
+  const [aiGeneratedDescription, setAiGeneratedDescription] = useState<string>('');
+
 
   const { toast } = useToast();
   const router = useRouter();
@@ -88,7 +89,10 @@ export default function Home() {
         themeSuggestions = [],
         spriteSuggestions = [],
         backgroundImageURL = '',
+        levelDescription: generatedLevelDescription = '',
       } = result || {};
+
+      setAiGeneratedDescription(generatedLevelDescription);
 
       const levelData = {
         levelLayout,
@@ -156,6 +160,14 @@ export default function Home() {
                 <span className="text-gray-500">Upload an image or sketch here</span>
               </div>
             )}
+
+          {aiGeneratedDescription && (
+                <div className="mt-4">
+                    <Label>Generated Level Description:</Label>
+                    <p className="text-sm text-muted-foreground">{aiGeneratedDescription}</p>
+                </div>
+            )}
+
 
             <Label htmlFor="level-description">Level Description (optional):</Label>
             <Textarea
