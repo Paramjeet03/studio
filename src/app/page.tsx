@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useDropzone } from 'react-dropzone';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -59,8 +60,8 @@ export default function Home() {
     },
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
     if (!file) return;
 
     const reader = new FileReader();
@@ -68,7 +69,9 @@ export default function Home() {
       setImageURL(reader.result as string);
     };
     reader.readAsDataURL(file);
-  };
+  }, []);
+
+  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
 
     const handleRemoveImage = () => {
         setImageURL('');
@@ -155,22 +158,14 @@ export default function Home() {
                 </Button>
               </>
             ) : (
-              <>
-                <Input
-                  id="image-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <Label htmlFor="image-upload" className="cursor-pointer">
-                  <Button asChild>
-                    <>
-                      Select Image <Icons.upload className="ml-2 h-4 w-4" />
-                    </>
-                  </Button>
-                </Label>
-              </>
+              <div {...getRootProps()} className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer">
+              <input {...getInputProps()} />
+              {
+                isDragActive ?
+                  <p>Drop the files here ...</p> :
+                  <p>Drag 'n' drop some files here, or click to select files</p>
+              }
+             </div>
             )}
 
             <Label htmlFor="level-description">
@@ -206,3 +201,4 @@ export default function Home() {
     </div>
   );
 }
+
