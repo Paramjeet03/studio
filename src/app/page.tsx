@@ -28,6 +28,7 @@ import {Icons} from '@/components/icons';
 import {useDropzone} from 'react-dropzone';
 import {codeLanguageOptions} from '@/lib/utils';
 import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
+import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
@@ -41,6 +42,7 @@ export default function Home() {
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
   const {toast} = useToast();
   const router = useRouter();
+  const [generatedDescription, setGeneratedDescription] = useState<string>('');
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -64,6 +66,7 @@ export default function Home() {
 
   const handleRemoveImage = () => {
     setImageURL('');
+    setGeneratedDescription(''); // Clear the description when the image is removed
   };
 
   const handleGenerateLevel = async () => {
@@ -95,6 +98,7 @@ export default function Home() {
       }
 
       const levelLayout = result.levelLayout;
+
       router.push(
         `/output?levelLayout=${encodeURIComponent(
           levelLayout
@@ -116,11 +120,60 @@ export default function Home() {
     }
   };
 
+  const handleGenerateDescription = async () => {
+    if (!imageURL) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image first to generate a description.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await generateLevelDescription({
+        imageURL: imageURL,
+        levelDescription: form.getValues().levelDescription,
+        suggestionLevel: 75, // Adjust as needed
+      });
+
+      if (result && result.description) {
+        setGeneratedDescription(result.description);
+        form.setValue('levelDescription', result.description);
+        toast({
+          title: 'Description Generated',
+          description: 'A level description has been automatically generated.',
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Could not generate a level description. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error generating description:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to generate description.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
-      <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2 text-center">LevelUp AI</h1>
+        <p className="text-sm text-muted-foreground text-center">
+          Quickly generate game level templates.
+        </p>
+      </div>
 
-      <div className="flex w-full max-w-4xl space-x-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl">
         <Card className="w-full dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400">
           <CardHeader>
             <CardTitle>Level Generator</CardTitle>
@@ -145,7 +198,7 @@ export default function Home() {
             ) : (
               <div
                 {...getRootProps()}
-                className="border-2 border-dashed rounded-md p-4 dark:border-cyan-400 text-center cursor-pointer"
+                className="border-2 border-dashed rounded-md p-4 dark:border-cyan-400 text-center cursor-pointer dark:bg-gray-700"
               >
                 <input
                   {...getInputProps()}
@@ -165,12 +218,30 @@ export default function Home() {
             <Label htmlFor="level-description">
               Level Description (optional):
             </Label>
-            <Textarea
-              id="level-description"
-              placeholder="Describe any specific requirements or ideas for the level"
-              {...form.register('levelDescription')}
-              className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400"
-            />
+            <div className="relative">
+              <Textarea
+                id="level-description"
+                placeholder="Describe any specific requirements or ideas for the level"
+                {...form.register('levelDescription')}
+                className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400 pr-10"
+                rows={4}
+              />
+              <Button
+                type="button"
+                onClick={handleGenerateDescription}
+                disabled={loading}
+                variant="outline"
+                size="icon"
+                className="absolute right-2 bottom-2 h-8 w-8"
+              >
+                {loading ? (
+                  <Icons.spinner className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Icons.edit className="h-4 w-4" />
+                )}
+                <span className="sr-only">Generate Description</span>
+              </Button>
+            </div>
 
             <Label htmlFor="code-language">Code Language:</Label>
             <Select
@@ -202,8 +273,6 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-      {/* <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
-       */}
     </div>
   );
 }
