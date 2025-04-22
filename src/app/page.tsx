@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
+import { motion } from 'framer-motion';
 
 import {Button} from '@/components/ui/button';
 import {Input} from '@/components/ui/input';
@@ -178,8 +179,20 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+    <motion.div
+      className="flex flex-col items-center justify-center min-h-screen p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.h1
+        className="text-3xl font-bold mb-4"
+        initial={{ y: -50 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        LevelUp AI
+      </motion.h1>
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full">
@@ -195,16 +208,20 @@ export default function Home() {
               Upload Image:
             </Label>
             {imageURL ? (
-              <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+              >
                 <img
                   src={imageURL}
                   alt="Uploaded"
                   className="max-h-64 object-contain rounded-md"
                 />
-                <Button variant="secondary" onClick={handleRemoveImage}>
+                <Button variant="secondary" onClick={handleRemoveImage} className="mt-2">
                   Remove Image
                 </Button>
-              </>
+              </motion.div>
             ) : (
               <div {...getRootProps()} className="dropzone w-full h-40 border-2 border-dashed border-gray-400 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer">
                 <input {...getInputProps()} />
@@ -267,6 +284,7 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 }
+
