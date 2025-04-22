@@ -1,14 +1,14 @@
 'use client';
 
-import {useState, useCallback, useEffect} from 'react';
-import {useRouter} from 'next/navigation';
-import {useForm} from 'react-hook-form';
-import {z} from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
@@ -16,8 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {Label} from '@/components/ui/label';
-import {Textarea} from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectTrigger,
@@ -25,10 +25,10 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import {useToast} from '@/hooks/use-toast';
-import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
-import {Icons} from '@/components/icons';
-import {useDropzone} from 'react-dropzone';
+import { useToast } from '@/hooks/use-toast';
+import { generateLevelFromImage } from '@/ai/flows/generate-level-from-image';
+import { Icons } from '@/components/icons';
+import { useDropzone } from 'react-dropzone';
 import { generateLevelDescription } from "@/ai/flows/generate-level-description";
 
 const formSchema = z.object({
@@ -38,24 +38,21 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>;
 
 const codeLanguageOptions = [
-  {label: 'Python', value: 'python'},
-  {label: 'Lua', value: 'lua'},
-  {label: 'GDScript', value: 'gdscript'},
-  {label: 'C#', value: 'csharp'},
-  {label: 'C++', value: 'cpp'},
-  {label: 'JSON', value: 'json'},
+  { label: 'Python', value: 'python' },
+  { label: 'Lua', value: 'lua' },
+  { label: 'GDScript', value: 'gdscript' },
+  { label: 'C#', value: 'csharp' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'JSON', value: 'json' },
 ];
-
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [descriptionLoading, setDescriptionLoading] = useState<boolean>(false);
   const [codeLanguage, setCodeLanguage] = useState<string>('python');
-  const [suggestionLevel, setSuggestionLevel] = useState<number>(50);
 
-
-  const {toast} = useToast();
+  const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<FormSchema>({
@@ -76,8 +73,7 @@ export default function Home() {
     reader.readAsDataURL(file);
   }, []);
 
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
-
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleRemoveImage = () => {
     setImageURL('');
@@ -111,7 +107,7 @@ export default function Home() {
         return;
       }
 
-      const {levelLayout} = result;
+      const { levelLayout } = result;
 
       const url = `/output?levelLayout=${encodeURIComponent(levelLayout)}&codeLanguage=${codeLanguage}`;
       router.push(url);
@@ -132,51 +128,49 @@ export default function Home() {
     }
   };
 
-  const handleGenerateDescription = async () => {
-    if (!imageURL) {
-      toast({
-        title: 'Error',
-        description: 'Please upload an image first.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    const handleGenerateDescription = async () => {
+        if (!imageURL) {
+            toast({
+                title: 'Error',
+                description: 'Please upload an image first.',
+                variant: 'destructive',
+            });
+            return;
+        }
 
-    setDescriptionLoading(true);
-    try {
-      const result = await generateLevelDescription({
-        imageURL: imageURL,
-        levelDescription: form.getValues().levelDescription,
-        suggestionLevel: suggestionLevel,
-      });
+        setDescriptionLoading(true);
+        try {
+            const result = await generateLevelDescription({
+                imageURL: imageURL,
+                levelDescription: form.getValues().levelDescription,
+            });
 
-      if (!result || !result.description) {
-        toast({
-          title: 'Error',
-          description: 'Failed to generate level description. Please try again.',
-          variant: 'destructive',
-        });
-        return;
-      }
+            if (!result || !result.description) {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to generate level description. Please try again.',
+                    variant: 'destructive',
+                });
+                return;
+            }
 
-      form.setValue('levelDescription', result.description);
+            form.setValue('levelDescription', result.description);
 
-      toast({
-        title: 'Level Description Generated!',
-        description: 'The level description has been automatically generated.',
-      });
-    } catch (error: any) {
-      console.error('Error generating level description:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to generate level description.',
-        variant: 'destructive',
-      });
-    } finally {
-      setDescriptionLoading(false);
-    }
-  };
-
+            toast({
+                title: 'Level Description Generated!',
+                description: 'The level description has been automatically generated.',
+            });
+        } catch (error: any) {
+            console.error('Error generating level description:', error);
+            toast({
+                title: 'Error',
+                description: error.message || 'Failed to generate level description.',
+                variant: 'destructive',
+            });
+        } finally {
+            setDescriptionLoading(false);
+        }
+    };
 
   return (
     <motion.div
@@ -236,37 +230,36 @@ export default function Home() {
             <Label htmlFor="level-description">
               Level Description (optional):
             </Label>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-x-2">
-              <Textarea
-                id="level-description"
-                placeholder="Describe any specific requirements or ideas for the level"
-                {...form.register('levelDescription')}
-                className="flex-grow"
-              />
-               <Button
-                 onClick={handleGenerateDescription}
-                 disabled={descriptionLoading}
-                 variant="outline"
-                 className="sm:w-auto"
-               >
-                 {descriptionLoading ? (
-                   <>
-                     Generating...
-                     <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-                   </>
-                 ) : (
-                   'Generate Description'
-                 )}
-               </Button>
+             <div className="flex flex-col sm:flex-row space-y-2 sm:space-x-2">
+               <Textarea
+                 id="level-description"
+                 placeholder="Describe any specific requirements or ideas for the level"
+                 {...form.register('levelDescription')}
+                 className="flex-grow"
+               />
+                <Button
+                  onClick={handleGenerateDescription}
+                  disabled={descriptionLoading}
+                  variant="outline"
+                  className="sm:w-auto"
+                >
+                  {descriptionLoading ? (
+                    <>
+                      Generating...
+                      <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                    </>
+                  ) : (
+                    'Generate Description'
+                  )}
+                </Button>
 
-            </div>
-
+             </div>
             <Label htmlFor="code-language">
               Code Language:
             </Label>
             <Select onValueChange={setCodeLanguage} defaultValue={codeLanguage}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a language"/>
+                <SelectValue placeholder="Select a language" />
               </SelectTrigger>
               <SelectContent>
                 {codeLanguageOptions.map((lang) => (
@@ -277,9 +270,15 @@ export default function Home() {
               </SelectContent>
             </Select>
 
-
             <Button onClick={handleGenerateLevel} disabled={loading}>
-              {loading ? 'Generate Level Layout' : 'Generate Level Layout'}
+              {loading ? (
+                <>
+                  Generating Level Layout
+                  <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
+                </>
+              ) : (
+                'Generate Level Layout'
+              )}
             </Button>
           </CardContent>
         </Card>
