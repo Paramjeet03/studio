@@ -30,7 +30,7 @@ import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {Icons} from '@/components/icons';
 import {Slider} from "@/components/ui/slider"
 import {Switch} from "@/components/ui/switch"
-import {generateLevelDescription} from "@/ai/flows/generate-level-description";
+import { generateLevelDescription } from "@/ai/flows/generate-level-description";
 
 
 const formSchema = z.object({
@@ -132,44 +132,6 @@ export default function Home() {
     }
   };
 
-  const onGenerateDescription = async () => {
-    if (!imageURL) {
-      toast({
-        title: 'Error',
-        description: 'Please upload an image first.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await generateLevelDescription({
-        imageURL,
-        levelDescription: form.getValues().levelDescription,
-        suggestionLevel: autoSuggest ? 70 : 0, // Use a higher level for auto-suggestions
-      });
-
-      if (result && result.description) {
-        form.setValue('levelDescription', result.description);
-      } else {
-        toast({
-          title: 'Error',
-          description: 'Failed to generate level description. Please try again.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error: any) {
-      console.error('Error generating level description:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to generate level description.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -220,19 +182,7 @@ export default function Home() {
                 {...form.register('levelDescription')}
                 className="flex-grow"
               />
-              <Button
-                type="button"
-                onClick={onGenerateDescription}
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    Generating...
-                  </>
-                ) : (
-                  <>Generate Description</>
-                )}
-              </Button>
+
             </div>
 
             <Label htmlFor="code-language">
@@ -251,19 +201,7 @@ export default function Home() {
               </SelectContent>
             </Select>
 
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="auto-suggest">Auto-Suggestions:</Label>
-              <Switch
-                id="auto-suggest"
-                checked={autoSuggest}
-                onCheckedChange={(checked) => {
-                  setAutoSuggest(checked);
-                  if (checked) {
-                    onGenerateDescription(); // Trigger description generation immediately
-                  }
-                }}
-              />
-            </div>
+
             <Button onClick={handleGenerateLevel} disabled={loading}>
               {loading ? 'Generate Level Layout' : 'Generate Level Layout'}
             </Button>
@@ -273,3 +211,4 @@ export default function Home() {
     </div>
   );
 }
+
