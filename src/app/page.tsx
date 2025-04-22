@@ -1,6 +1,6 @@
 'use client';
 
-import {useState, useCallback, useEffect} from 'react';
+import {useState, useCallback} from 'react';
 import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import {z} from 'zod';
@@ -26,16 +26,14 @@ import {useToast} from '@/hooks/use-toast';
 import {generateLevelFromImage} from '@/ai/flows/generate-level-from-image';
 import {Icons} from '@/components/icons';
 import {useDropzone} from 'react-dropzone';
-import { generateLevelDescription } from '@/ai/flows/generate-level-description';
 import {codeLanguageOptions} from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {Alert, AlertDescription, AlertTitle} from '@/components/ui/alert';
 
 const formSchema = z.object({
   levelDescription: z.string().optional(),
 });
 
 type FormSchema = z.infer<typeof formSchema>;
-
 
 export default function Home() {
   const [imageURL, setImageURL] = useState<string>('');
@@ -118,54 +116,9 @@ export default function Home() {
     }
   };
 
-  const handleGenerateDescription = async () => {
-    if (!imageURL) {
-      toast({
-        title: 'Error',
-        description: 'Please upload an image first.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await generateLevelDescription({
-        imageURL,
-        levelDescription: form.getValues().levelDescription,
-      });
-
-      if (!result || !result.description) {
-        toast({
-          title: 'Error',
-          description: 'Failed to generate description. Please try again.',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const resultDescription = result.description;
-      form.setValue('levelDescription', resultDescription);
-
-      toast({
-        title: 'Level Description Generated!',
-        description: 'The level description has been automatically generated.',
-      });
-    } catch (error: any) {
-      console.error('Error generating description:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to generate description.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 dark:bg-gray-900 dark:text-slate-200">
-          <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+      <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
 
       <div className="flex w-full max-w-4xl space-x-4">
         <Card className="w-full dark:bg-gray-800 dark:text-slate-200 dark:border-cyan-400">
@@ -219,17 +172,6 @@ export default function Home() {
               className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400"
             />
 
-             <Button onClick={handleGenerateDescription} disabled={loading}>
-              {loading ? (
-                <>
-                  Generating Description
-                  <Icons.spinner className="ml-2 h-4 w-4 animate-spin" />
-                </>
-              ) : (
-                'Generate Description'
-              )}
-            </Button>
-
             <Label htmlFor="code-language">Code Language:</Label>
             <Select
               onValueChange={setCodeLanguage}
@@ -260,7 +202,8 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+      {/* <h1 className="text-3xl font-bold mb-4">LevelUp AI</h1>
+       */}
     </div>
   );
 }
-

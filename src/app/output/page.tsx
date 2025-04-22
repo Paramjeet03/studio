@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 export default function OutputPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { toast } = useToast();
     const levelLayout = searchParams.get('levelLayout') || '';
     const codeLanguage = searchParams.get('codeLanguage') || 'txt';
 
