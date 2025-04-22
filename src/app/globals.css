@@ -8,8 +8,8 @@ body {
 
 @layer base {
   :root {
-    --background: 30 30% 15%; /* Dark gray */
-    --foreground: 210 40% 98%; /* Light gray */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
     --popover: 222.2 84% 4.9%;
@@ -18,12 +18,12 @@ body {
     --card-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --primary: 180 100% 25%; /* Teal */
+    --primary: 256.8 83.2% 53.1%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 50 79.2% 73.5%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 12.7 69.4% 58.8%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --ring: 217.2 32.6% 17.5%;
