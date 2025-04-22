@@ -66,6 +66,7 @@ export default function Home() {
   const handleRemoveImage = () => {
     setImageURL('');
     form.setValue('levelDescription', '');
+     setImprovementSuggestions('');
   };
 
   const handleGenerateLevel = async () => {
@@ -138,7 +139,7 @@ export default function Home() {
       });
 
       if (result && result.description) {
-        setGeneratedDescription(result.description);
+        setImprovementSuggestions(result.description);
         form.setValue('levelDescription', result.description);
         toast({
           title: 'Description Generated',
@@ -311,7 +312,11 @@ export default function Home() {
                     <Label>Improvement Suggestions:</Label>
                       <Card className="dark:bg-gray-700 dark:text-slate-200 dark:border-cyan-400">
                         <CardContent>
-                          {improvementSuggestions}
+                            <ul>
+                              {improvementSuggestions.split('. ').map((suggestion, index) => (
+                                <li key={index} className="list-disc ml-4">{suggestion}</li>
+                              ))}
+                            </ul>
                         </CardContent>
                       </Card>
                   </div>
@@ -322,5 +327,3 @@ export default function Home() {
     </div>
   );
 }
-
-
